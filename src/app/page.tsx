@@ -11,16 +11,22 @@ import { fallbackAnalysis } from '@/lib/fallbackAnalysis';
 import JobRoleInput from '@/components/JobRoleInput';
 import ResumeUpload from '@/components/ResumeUpload';
 import AnalysisLoader from '@/components/AnalysisLoader';
-import ResultsPage from '@/components/ResultsPage';
+import Dashboard from '@/components/Dashboard';
+import AuthModal from '@/components/AuthModal';
+import { useUser } from '@/contexts/UserContext';
+import { ResumeService, AnalysisService } from '@/lib/supabase/services';
 
 export default function Home() {
+  const { user, profile, loading: authLoading } = useUser();
   const [appState, setAppState] = useState<AppState>('input');
   const [jobInput, setJobInput] = useState<JobInput>({ jobTitle: '', seniority: 'mid', industry: '' });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState<string>('');
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [parseWarnings, setParseWarnings] = useState<string[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const jobInputRef = useRef<JobInput>(jobInput);
 
 
@@ -76,9 +82,10 @@ export default function Home() {
       setParseWarnings(warnings);
 
       // Step 2: Extract structured fields
-      const resumeData: ResumeData = extractFields(text);
-      warnings.push(...resumeData.parseWarnings);
+      const extractedData: ResumeData = extractFields(text);
+      warnings.push(...extractedData.parseWarnings);
       setParseWarnings(warnings);
+      setResumeData(extractedData);
 
       // Step 3: Analyze with hardcoded API key from environment
       const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -90,7 +97,7 @@ export default function Home() {
           analysisResult = await analyzeWithAI(text, currentJob, apiKey);
         } catch (aiError: unknown) {
           console.warn('AI analysis failed, falling back to rule-based:', aiError);
-          analysisResult = fallbackAnalysis(resumeData, currentJob);
+          analysisResult = fallbackAnalysis(extractedData, currentJob);
           const errMsg = (aiError as { error?: { message?: string }; message?: string })?.error?.message
             || (aiError as Error)?.message
             || 'Unknown error';
@@ -98,9 +105,38 @@ export default function Home() {
           setParseWarnings([...warnings]);
         }
       } else {
-        analysisResult = fallbackAnalysis(resumeData, currentJob);
+        analysisResult = fallbackAnalysis(extractedData, currentJob);
         warnings.push('API key not configured. Contact the administrator.');
         setParseWarnings([...warnings]);
+      }
+
+      // Step 4: Save to database if user is logged in
+      if (user && profile) {
+        try {
+          // Save resume
+          const savedResume = await ResumeService.saveResume(
+            user.id,
+            resumeFile?.name || 'Pasted Resume',
+            text,
+            extractedData
+          ) as any;
+
+          // Save analysis
+          await AnalysisService.saveAnalysis(
+            user.id,
+            savedResume.id,
+            currentJob,
+            analysisResult
+          );
+          
+          // Silent success - no console logs in production
+        } catch (dbError: any) {
+          // Only log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Database save failed (app continues normally):', dbError?.message);
+          }
+          // Continue anyway - don't block the user
+        }
       }
 
       setResult(analysisResult);
@@ -113,6 +149,7 @@ export default function Home() {
 
   const handleRecheck = () => {
     setResult(null);
+    setResumeData(null);
     setAppState('input');
   };
 
@@ -145,6 +182,66 @@ export default function Home() {
             <span style={{ color: 'var(--accent)' }}>AI</span>
           </span>
         </div>
+        
+        {!authLoading && (
+          <div>
+            {user ? (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                color: 'var(--text-muted)',
+                fontSize: '14px',
+              }}>
+                <span>👋 {profile?.full_name || user.email}</span>
+                <button
+                  onClick={async () => {
+                    const { signOut } = await import('@/lib/supabase/client').then(m => ({ signOut: () => m.supabase.auth.signOut() }));
+                    await signOut();
+                    window.location.reload();
+                  }}
+                  style={{
+                    padding: '6px 14px',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    color: '#ef4444',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--accent)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                }}
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Main content */}
@@ -431,11 +528,14 @@ export default function Home() {
                   ))}
                 </div>
               )}
-              <ResultsPage
-                result={result}
-                jobInput={jobInput}
-                onRecheck={handleRecheck}
-              />
+              {resumeData && (
+                <Dashboard
+                  result={result}
+                  resumeData={resumeData}
+                  jobInput={jobInput}
+                  onBack={handleRecheck}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -458,6 +558,13 @@ export default function Home() {
           Resume analysis and job matching insights are for guidance purposes only. Your data stays in your browser — nothing is stored on any server.
         </span>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
+      />
 
     </>
   );

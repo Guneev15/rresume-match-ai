@@ -24,23 +24,32 @@ export async function analyzeWithAI(
   // Read model from environment variable
   const model = process.env.NEXT_PUBLIC_AI_MODEL || 'arcee-ai/trinity-large-preview:free';
 
-  const prompt = buildAnalysisPrompt(resumeText, job);
+  // Trim resume text to first 3000 chars for speed (enough for key info)
+  const trimmedResume = resumeText.length > 3000 
+    ? resumeText.substring(0, 3000) + '\n[... resume truncated for speed ...]'
+    : resumeText;
+  const prompt = buildAnalysisPrompt(trimmedResume, job);
 
-  const response = await client.chat.completions.create({
-    model,
-    messages: [
-      {
-        role: 'system',
-        content: 'You are ResumeMatchAI, a career-coach assistant. You analyze resumes and return structured JSON. Always return valid JSON only, no markdown formatting or code blocks.',
-      },
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-    temperature: 0.3,
-    max_tokens: 2000,
-  });
+  // Add 30-second timeout for faster analysis
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are ResumeMatchAI. Analyze resumes and return ONLY valid JSON. Be concise.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 1200,
+    }, { signal: controller.signal });
 
   const content = response.choices[0]?.message?.content;
   if (!content) {
@@ -48,16 +57,31 @@ export async function analyzeWithAI(
   }
 
   // Clean potential markdown code blocks from response
-  const cleaned = content
+  let cleaned = content
     .replace(/```json\s*/gi, '')
     .replace(/```\s*/g, '')
     .trim();
 
   try {
+    // Try parsing directly first
     const parsed = JSON.parse(cleaned);
     return normalizeResult(parsed);
   } catch {
-    throw new Error('Failed to parse AI response. The model returned invalid JSON.');
+    // If direct parse fails, try to extract JSON object
+    try {
+      // Look for JSON object pattern
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return normalizeResult(parsed);
+      }
+      throw new Error('No JSON object found in response');
+    } catch (e) {
+      throw new Error('Failed to parse AI response. The model returned invalid JSON.');
+    }
+  }
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

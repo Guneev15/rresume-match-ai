@@ -13,7 +13,7 @@ import { RefreshCw, Download } from 'lucide-react';
 interface Props {
   result: AnalysisResult;
   jobInput: JobInput;
-  onRecheck: () => void;
+  onRecheck?: () => void;
 }
 
 export default function ResultsPage({ result, jobInput, onRecheck }: Props) {

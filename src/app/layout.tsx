@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { UserProvider } from "@/contexts/UserContext";
 
 export const metadata: Metadata = {
   title: "AI Resume Analyzer & Job Match Tool | ATS Resume Optimizer",
@@ -72,13 +73,15 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          {children}
-        </div>
+        <UserProvider>
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {children}
+          </div>
+        </UserProvider>
       </body>
     </html>
   );

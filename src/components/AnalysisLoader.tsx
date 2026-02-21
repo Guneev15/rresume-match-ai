@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, FileSearch, Brain, Sparkles, ListChecks } from 'lucide-react';
 
 const STEPS = [
@@ -11,8 +11,24 @@ const STEPS = [
   { icon: ListChecks, label: 'Generating suggestions', sublabel: 'Creating actionable recommendations' },
 ];
 
+const QUOTES = [
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Success is not final, failure is not fatal.", author: "Winston Churchill" },
+  { text: "Your career is a marathon, not a sprint.", author: "Richard Branson" },
+  { text: "Every expert was once a beginner.", author: "Helen Hayes" },
+  { text: "Opportunities don't happen. You create them.", author: "Chris Grosser" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+  { text: "Great things never come from comfort zones.", author: "Ben Francia" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Be so good they can't ignore you.", author: "Steve Martin" },
+];
+
 export default function AnalysisLoader() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * QUOTES.length));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,6 +36,19 @@ export default function AnalysisLoader() {
     }, 2500);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex(prev => {
+        let next;
+        do { next = Math.floor(Math.random() * QUOTES.length); } while (next === prev);
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const quote = QUOTES[quoteIndex];
 
   return (
     <div style={{
@@ -139,6 +168,36 @@ export default function AnalysisLoader() {
             transition={{ duration: 0.5 }}
           />
         </div>
+      </div>
+
+      {/* Motivational Quote */}
+      <div style={{ marginTop: '32px', maxWidth: '420px', textAlign: 'center' }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={quoteIndex}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4 }}
+          >
+            <p style={{
+              fontSize: '14px',
+              fontStyle: 'italic',
+              color: 'var(--text-muted)',
+              lineHeight: '1.6',
+              marginBottom: '4px',
+            }}>
+              &ldquo;{quote.text}&rdquo;
+            </p>
+            <p style={{
+              fontSize: '12px',
+              color: 'var(--accent)',
+              fontWeight: '500',
+            }}>
+              — {quote.author}
+            </p>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
