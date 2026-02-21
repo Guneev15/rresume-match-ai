@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, DollarSign, TrendingUp, ExternalLink, Bookmark, Check } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, TrendingUp, ExternalLink, Bookmark, Check, Clock } from 'lucide-react';
 import { JobRecommendation, generateJobRecommendations, generateAIJobRecommendations } from './jobRecommendationService';
 import { ResumeData, JobInput } from '@/lib/types';
 import { useUser } from '@/contexts/UserContext';
@@ -60,7 +60,7 @@ export default function JobRecommendations({ resume, jobInput }: JobRecommendati
       .eq('saved', true);
 
     if (!error && data) {
-      setSavedJobs(new Set(data.map(j => j.id)));
+      setSavedJobs(new Set(data.map((j: any) => j.id)));
     }
   };
 
@@ -293,9 +293,70 @@ export default function JobRecommendations({ resume, jobInput }: JobRecommendati
               )}
             </div>
 
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {job.url && (
+            {/* Posted Date & Actions */}
+            <div style={{ marginTop: '8px' }}>
+              {/* Posted date */}
+              {job.postedDate && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '12px',
+                  color: 'var(--text-muted)',
+                  marginBottom: '12px',
+                }}>
+                  <Clock size={12} />
+                  Posted: {job.postedDate}
+                </div>
+              )}
+
+              {/* Apply buttons */}
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: '500' }}>
+                  Apply on:
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {(job.applyLinks || []).map(link => {
+                    const colors: Record<string, string> = {
+                      linkedin: '#0077b5',
+                      indeed: '#6039b0',
+                      glassdoor: '#0caa41',
+                      google: '#4285f4',
+                    };
+                    return (
+                      <a
+                        key={link.platform}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          padding: '8px 14px',
+                          background: colors[link.platform] || 'var(--accent)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+                        onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                      >
+                        {link.label}
+                        <ExternalLink size={12} />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Fallback: if no applyLinks but url exists */}
+              {(!job.applyLinks || job.applyLinks.length === 0) && job.url && (
                 <a
                   href={job.url}
                   target="_blank"
@@ -320,24 +381,27 @@ export default function JobRecommendations({ resume, jobInput }: JobRecommendati
                   View Job <ExternalLink size={14} />
                 </a>
               )}
+
+              {/* Save button */}
               {user && (
                 <button
                   onClick={() => toggleSaveJob(job)}
                   style={{
-                    padding: '10px 16px',
+                    marginTop: '8px',
+                    padding: '8px 14px',
                     background: savedJobs.has(job.id) ? 'rgba(46, 196, 182, 0.2)' : 'var(--bg-primary)',
                     color: savedJobs.has(job.id) ? 'var(--accent)' : 'var(--text-primary)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '8px',
-                    fontSize: '14px',
+                    fontSize: '13px',
                     cursor: 'pointer',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
                   }}
                 >
                   <Bookmark size={14} fill={savedJobs.has(job.id) ? 'currentColor' : 'none'} />
-                  {savedJobs.has(job.id) ? 'Saved' : 'Save'}
+                  {savedJobs.has(job.id) ? 'Saved' : 'Save Job'}
                 </button>
               )}
             </div>

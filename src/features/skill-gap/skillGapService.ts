@@ -1,4 +1,4 @@
-import { ResumeData, JobInput } from '../types';
+import { ResumeData, JobInput } from '@/lib/types';
 
 export interface SkillMatch {
   skill: string;
@@ -187,8 +187,9 @@ function calculateExperienceDistribution(resume: ResumeData): ExperienceCategory
       category = 'Design';
     }
     
-    // Calculate years (rough estimate)
-    const years = exp.duration ? parseYears(exp.duration) : 1;
+    // Calculate years (rough estimate from startDate/endDate)
+    const durationStr = exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : '';
+    const years = durationStr ? parseYears(durationStr) : 1;
     categories[category] = (categories[category] || 0) + years;
   });
   
