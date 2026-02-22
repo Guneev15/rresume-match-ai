@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AnalysisResult, JobInput } from '@/lib/types';
+import { exportAnalysisPdf } from '@/lib/exportPdf';
 import SummaryCard from './results/SummaryCard';
 import SectionScores from './results/SectionScores';
 import ActionItems from './results/ActionItems';
@@ -18,20 +19,7 @@ interface Props {
 
 export default function ResultsPage({ result, jobInput, onRecheck }: Props) {
   const handleDownload = () => {
-    const data = {
-      job: jobInput,
-      analysis: result,
-      generatedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `resume-analysis-${jobInput.jobTitle.replace(/\s+/g, '-').toLowerCase()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportAnalysisPdf(result, jobInput);
   };
 
   return (
