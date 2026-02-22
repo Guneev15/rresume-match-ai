@@ -142,7 +142,17 @@ export default function Home() {
       setResult(analysisResult);
       setAppState('results');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      const rawMsg = err instanceof Error ? err.message : String(err);
+      // Translate common network errors into user-friendly messages
+      let friendlyMsg: string;
+      if (rawMsg.includes('Failed to fetch') || rawMsg.includes('NetworkError') || rawMsg.includes('fetch')) {
+        friendlyMsg = 'Network error — please check your internet connection and try again. If the issue persists, the AI service may be temporarily unavailable.';
+      } else if (rawMsg.includes('abort') || rawMsg.includes('timeout')) {
+        friendlyMsg = 'Analysis timed out. Please try again — shorter resumes analyze faster.';
+      } else {
+        friendlyMsg = rawMsg || 'An unexpected error occurred. Please try again.';
+      }
+      setError(friendlyMsg);
       setAppState('input');
     }
   };
