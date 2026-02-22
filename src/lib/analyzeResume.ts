@@ -1,74 +1,114 @@
-import OpenAI from 'openai';
 import { AnalysisResult, JobInput } from './types';
 import { buildAnalysisPrompt } from './prompts';
+
+// Models to try in order — if the primary fails to return valid JSON, try the next
+const FALLBACK_MODELS = [
+  'meta-llama/llama-3.1-8b-instruct:free',
+  'google/gemma-2-9b-it:free',
+];
 
 export async function analyzeWithAI(
   resumeText: string,
   job: JobInput,
   apiKey: string
 ): Promise<AnalysisResult> {
-  // Use environment variables for provider and model configuration
-  const provider = process.env.NEXT_PUBLIC_API_PROVIDER || 'openrouter';
-  const isOpenRouter = provider === 'openrouter';
+  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
 
-  const baseURL = isOpenRouter
-    ? 'https://openrouter.ai/api/v1'
-    : undefined; // defaults to OpenAI
-
-  const client = new OpenAI({
-    apiKey,
-    baseURL,
-    dangerouslyAllowBrowser: true,
-  });
-
-  // Read model from environment variable
-  const model = process.env.NEXT_PUBLIC_AI_MODEL || 'arcee-ai/trinity-large-preview:free';
-
-  // Trim resume text to first 3000 chars for speed (enough for key info)
+  // Trim resume text to first 3000 chars for speed
   const trimmedResume = resumeText.length > 3000 
     ? resumeText.substring(0, 3000) + '\n[... resume truncated for speed ...]'
     : resumeText;
   const prompt = buildAnalysisPrompt(trimmedResume, job);
 
-  // 60-second timeout — free-tier AI models can be slow
+  // Build the models to try: primary first, then fallbacks (de-duplicated)
+  const modelsToTry = [primaryModel, ...FALLBACK_MODELS.filter(m => m !== primaryModel)];
+
+  let lastError: string = '';
+
+  for (const model of modelsToTry) {
+    try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[AI] Trying model: ${model}`);
+      }
+
+      const result = await callOpenRouter(apiKey, model, prompt);
+      if (result) return result;
+
+      lastError = `Model "${model}" returned unparseable response`;
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err.message : String(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[AI] Model "${model}" failed:`, lastError);
+      }
+    }
+  }
+
+  throw new Error(`AI analysis failed after trying ${modelsToTry.length} models. Last error: ${lastError}`);
+}
+
+/**
+ * Call OpenRouter API directly with fetch (more reliable than SDK for error handling)
+ */
+async function callOpenRouter(
+  apiKey: string,
+  model: string,
+  prompt: string
+): Promise<AnalysisResult | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 45000); // 45s per attempt
 
   try {
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are ResumeMatchAI. Analyze resumes and return ONLY valid JSON. Be concise.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.3,
-      max_tokens: 1200,
-    }, { signal: controller.signal });
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://resumematchai.app',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are ResumeMatchAI. Analyze resumes against job descriptions. You MUST respond with ONLY a valid JSON object — no markdown, no explanation, no extra text. Just raw JSON.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 1500,
+      }),
+      signal: controller.signal,
+    });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error('No response from AI model');
-  }
-
-  // Log raw response in dev mode for debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[AI Raw Response]', content.substring(0, 500));
-  }
-
-  const parsed = extractJSON(content);
-  if (!parsed) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[AI Parse Failed] Full response:', content);
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`API error ${response.status}: ${errText.substring(0, 200)}`);
     }
-    throw new Error('Failed to parse AI response. The model returned invalid JSON.');
-  }
-  return normalizeResult(parsed);
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('Empty response from AI model');
+    }
+
+    // Log raw response in dev mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[AI Raw Response from ${model}]`, content.substring(0, 500));
+    }
+
+    const parsed = extractJSON(content);
+    if (!parsed) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`[AI Parse Failed - ${model}] Full response:`, content);
+      }
+      return null; // Return null to trigger fallback to next model
+    }
+
+    return normalizeResult(parsed);
   } finally {
     clearTimeout(timeout);
   }
