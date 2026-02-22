@@ -1,189 +1,198 @@
-'use client';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Copy, Check, PenTool } from 'lucide-react';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Rewrite } from '@/lib/types';
-import { ArrowRight, Copy, Check, RotateCcw } from 'lucide-react';
-
-interface Props {
-  rewrites: Rewrite[];
+interface RewrittenBullet {
+  original: string;
+  rewritten: string;
+  variations?: {
+    technical?: string;
+    product?: string;
+    leadership?: string;
+  };
 }
 
-type ToneKey = 'improved' | 'technical' | 'product' | 'leadership';
+interface Props {
+  bullets: RewrittenBullet[];
+}
 
-export default function RewrittenBullets({ rewrites }: Props) {
+type Tone = 'default' | 'technical' | 'product' | 'leadership';
+
+const TONES: { id: Tone; label: string }[] = [
+  { id: 'default', label: 'Default' },
+  { id: 'technical', label: 'Technical' },
+  { id: 'product', label: 'Product' },
+  { id: 'leadership', label: 'Leadership' },
+];
+
+export default function RewrittenBullets({ bullets }: Props) {
+  const [selectedTone, setSelectedTone] = useState<Tone>('default');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [activeTone, setActiveTone] = useState<ToneKey>('improved');
 
-  if (rewrites.length === 0) return null;
+  const getRewrittenText = (bullet: RewrittenBullet): string => {
+    if (selectedTone === 'default') return bullet.rewritten;
+    return bullet.variations?.[selectedTone] || bullet.rewritten;
+  };
 
-  const handleCopy = async (text: string, index: number) => {
-    await navigator.clipboard.writeText(text);
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const getRewriteText = (rewrite: Rewrite): string => {
-    if (activeTone === 'improved') return rewrite.improved;
-    return rewrite.toneVariants?.[activeTone as keyof typeof rewrite.toneVariants] || rewrite.improved;
-  };
-
-  const toneOptions: { key: ToneKey; label: string }[] = [
-    { key: 'improved', label: 'Default' },
-    { key: 'technical', label: 'Technical' },
-    { key: 'product', label: 'Product' },
-    { key: 'leadership', label: 'Leadership' },
-  ];
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-      className="card"
-    >
+    <div className="card" style={{ padding: '24px' }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '20px',
+        marginBottom: '18px',
         flexWrap: 'wrap',
         gap: '12px',
       }}>
         <h3 style={{
           fontFamily: 'var(--font-heading)',
-          fontSize: '1rem',
+          fontSize: '1.05rem',
           fontWeight: 700,
+          letterSpacing: '-0.01em',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
         }}>
-          <RotateCcw size={18} style={{ color: 'var(--accent)' }} />
+          <PenTool size={18} style={{ color: 'var(--accent)' }} />
           Rewritten Bullets
         </h3>
 
-        {/* Tone toggle */}
+        {/* Tone selector */}
         <div style={{
           display: 'flex',
-          gap: '4px',
+          gap: '3px',
           background: 'var(--bg-elevated)',
-          borderRadius: '8px',
+          borderRadius: '10px',
           padding: '3px',
+          border: '1px solid var(--border)',
         }}>
-          {toneOptions.map(opt => (
+          {TONES.map(tone => (
             <button
-              key={opt.key}
-              onClick={() => setActiveTone(opt.key)}
+              key={tone.id}
+              onClick={() => setSelectedTone(tone.id)}
               style={{
-                padding: '5px 10px',
-                fontSize: '0.72rem',
-                fontFamily: 'var(--font-heading)',
-                fontWeight: activeTone === opt.key ? 600 : 400,
-                background: activeTone === opt.key ? 'var(--bg-surface)' : 'transparent',
-                color: activeTone === opt.key ? 'var(--accent)' : 'var(--text-muted)',
+                padding: '5px 12px',
+                borderRadius: '7px',
                 border: 'none',
-                borderRadius: '6px',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                fontSize: '0.75rem',
+                fontWeight: selectedTone === tone.id ? 600 : 500,
+                fontFamily: 'var(--font-heading)',
+                color: selectedTone === tone.id ? 'white' : 'var(--text-muted)',
+                background: selectedTone === tone.id
+                  ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
+                  : 'transparent',
+                transition: 'all 0.2s ease',
               }}
             >
-              {opt.label}
+              {tone.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {rewrites.map((rewrite, i) => {
-          const displayText = getRewriteText(rewrite);
-          return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <AnimatePresence mode="wait">
+          {bullets.map((bullet, i) => (
             <motion.div
-              key={i}
+              key={`${i}-${selectedTone}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 + i * 0.08 }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
               style={{
-                background: 'var(--bg-elevated)',
-                borderRadius: '10px',
-                overflow: 'hidden',
+                borderRadius: '12px',
+                background: 'var(--bg-surface)',
                 border: '1px solid var(--border)',
+                overflow: 'hidden',
               }}
             >
               {/* Original */}
               <div style={{
                 padding: '14px 16px',
                 borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
               }}>
-                <div style={{
-                  fontSize: '0.72rem',
-                  fontFamily: 'var(--font-heading)',
+                <span style={{
+                  fontSize: '0.68rem',
+                  padding: '2px 7px',
+                  borderRadius: '5px',
+                  background: 'var(--bg-elevated)',
                   color: 'var(--text-muted)',
-                  marginBottom: '6px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-heading)',
+                  flexShrink: 0,
+                  marginTop: '2px',
                 }}>
-                  Original
-                </div>
-                <div style={{
-                  fontSize: '0.88rem',
-                  color: 'var(--text-sub)',
-                  lineHeight: 1.5,
+                  Before
+                </span>
+                <p style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted)',
+                  lineHeight: 1.6,
                   textDecoration: 'line-through',
-                  textDecorationColor: 'var(--text-muted)',
+                  textDecorationColor: 'rgba(255, 255, 255, 0.1)',
                 }}>
-                  {rewrite.original}
-                </div>
+                  {bullet.original}
+                </p>
               </div>
 
-              {/* Improved */}
+              {/* Rewritten */}
               <div style={{
                 padding: '14px 16px',
                 display: 'flex',
                 alignItems: 'flex-start',
-                gap: '12px',
+                gap: '10px',
+                background: 'rgba(124, 92, 252, 0.03)',
               }}>
-                <ArrowRight size={16} style={{ color: 'var(--accent)', marginTop: '2px', flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontSize: '0.72rem',
-                    fontFamily: 'var(--font-heading)',
-                    color: 'var(--accent)',
-                    marginBottom: '6px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}>
-                    Improved
-                  </div>
-                  <div style={{
-                    fontSize: '0.88rem',
-                    color: 'var(--text-primary)',
-                    lineHeight: 1.5,
-                  }}>
-                    {displayText}
-                  </div>
-                </div>
+                <span style={{
+                  fontSize: '0.68rem',
+                  padding: '2px 7px',
+                  borderRadius: '5px',
+                  background: 'var(--accent-subtle)',
+                  color: 'var(--accent)',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-heading)',
+                  flexShrink: 0,
+                  marginTop: '2px',
+                }}>
+                  After
+                </span>
+                <p style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.6,
+                  flex: 1,
+                }}>
+                  {getRewrittenText(bullet)}
+                </p>
                 <button
-                  onClick={() => handleCopy(displayText, i)}
+                  onClick={() => handleCopy(getRewrittenText(bullet), i)}
                   style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '6px',
-                    padding: '6px',
+                    background: 'none',
+                    border: 'none',
                     cursor: 'pointer',
-                    color: copiedIndex === i ? 'var(--accent)' : 'var(--text-muted)',
+                    padding: '4px',
+                    color: copiedIndex === i ? 'var(--success)' : 'var(--text-muted)',
                     flexShrink: 0,
-                    transition: 'color 0.2s',
-                    display: 'flex',
+                    transition: 'color 0.15s ease',
                   }}
-                  title="Copy to clipboard"
+                  title="Copy"
                 >
                   {copiedIndex === i ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
             </motion.div>
-          );
-        })}
+          ))}
+        </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 }

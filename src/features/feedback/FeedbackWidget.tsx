@@ -48,7 +48,7 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
 
   return (
     <>
-      {/* Trigger Button */}
+      {/* FAB Trigger */}
       <button
         onClick={() => setIsOpen(true)}
         style={{
@@ -57,20 +57,26 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
           right: '24px',
           width: '48px',
           height: '48px',
-          borderRadius: '50%',
-          background: 'var(--accent)',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
           color: 'white',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(46, 196, 182, 0.3)',
+          boxShadow: '0 4px 16px var(--accent-glow)',
           zIndex: 1000,
-          transition: 'transform 0.2s',
+          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.08) translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 24px var(--accent-glow)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 16px var(--accent-glow)';
+        }}
       >
         <MessageSquare size={20} />
       </button>
@@ -82,17 +88,19 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="glass-card"
             style={{
               position: 'fixed',
               bottom: '80px',
               right: '24px',
               width: '320px',
-              background: 'var(--bg-surface)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '16px',
+              background: 'rgba(18, 18, 26, 0.95)',
+              border: '1px solid rgba(124, 92, 252, 0.12)',
               overflow: 'hidden',
               zIndex: 1001,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(124, 92, 252, 0.06)',
+              padding: 0,
             }}
           >
             {/* Header */}
@@ -101,16 +109,31 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderBottom: '1px solid rgba(255,255,255,0.05)',
+              borderBottom: '1px solid var(--border)',
             }}>
-              <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)' }}>
+              <span style={{
+                fontSize: '0.88rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-heading)',
+              }}>
                 Rate {featureLabel}
               </span>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                style={{
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <X size={18} />
+                <X size={14} />
               </button>
             </div>
 
@@ -125,22 +148,31 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
                   <div style={{
                     width: '48px',
                     height: '48px',
-                    borderRadius: '50%',
-                    background: 'rgba(46, 196, 182, 0.1)',
+                    borderRadius: '14px',
+                    background: 'rgba(62, 207, 180, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto 12px',
                   }}>
-                    <Check size={24} style={{ color: 'var(--accent)' }} />
+                    <Check size={24} style={{ color: 'var(--success)' }} />
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)' }}>Thank you!</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>Your feedback helps us improve</div>
+                  <div style={{
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    fontFamily: 'var(--font-heading)',
+                  }}>
+                    Thank you!
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Your feedback helps us improve
+                  </div>
                 </motion.div>
               ) : (
                 <>
                   {/* Stars */}
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '16px' }}>
                     {[1, 2, 3, 4, 5].map(star => (
                       <button
                         key={star}
@@ -152,7 +184,7 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
                           border: 'none',
                           cursor: 'pointer',
                           padding: '4px',
-                          transition: 'transform 0.15s',
+                          transition: 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
                           transform: (hoveredStar >= star || rating >= star) ? 'scale(1.15)' : 'scale(1)',
                         }}
                       >
@@ -171,17 +203,11 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Any suggestions? (optional)"
                     rows={3}
+                    className="input"
                     style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      background: 'var(--bg-primary)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px',
                       resize: 'none',
-                      outline: 'none',
                       marginBottom: '12px',
+                      fontSize: '0.85rem',
                     }}
                   />
 
@@ -189,20 +215,12 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
                   <button
                     onClick={handleSubmit}
                     disabled={rating === 0 || submitting}
+                    className="btn-primary"
                     style={{
                       width: '100%',
-                      padding: '10px',
-                      background: rating === 0 ? 'rgba(46, 196, 182, 0.2)' : 'var(--accent)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: rating === 0 ? 'not-allowed' : 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
+                      padding: '10px',
+                      fontSize: '0.88rem',
                     }}
                   >
                     <Send size={14} />

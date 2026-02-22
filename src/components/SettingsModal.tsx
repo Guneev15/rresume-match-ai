@@ -70,7 +70,6 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       setTestMessage(`Connected! Model "${testModel}" is working.`);
     } catch (err: unknown) {
       setTestStatus('error');
-      // Try to extract detailed error message
       const error = err as { message?: string; error?: { message?: string }; status?: number };
       const detail = error?.error?.message || error?.message || 'Connection failed.';
       setTestMessage(`${detail} — Check your API key, model ID, and account credits.`);
@@ -92,11 +91,10 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
     display: 'block' as const,
     fontFamily: 'var(--font-heading)',
     fontWeight: 600,
-    fontSize: '0.85rem',
+    fontSize: '0.82rem',
     color: 'var(--text-sub)',
     marginBottom: '8px',
-    letterSpacing: '0.03em',
-    textTransform: 'uppercase' as const,
+    letterSpacing: '0.01em',
   };
 
   return (
@@ -104,8 +102,9 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.7)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -115,38 +114,61 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
+        className="glass-card"
         style={{
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
           padding: '32px',
           maxWidth: '480px',
           width: '100%',
           position: 'relative',
           maxHeight: '90vh',
           overflowY: 'auto',
+          background: 'rgba(18, 18, 26, 0.9)',
+          border: '1px solid rgba(124, 92, 252, 0.1)',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(124, 92, 252, 0.05)',
         }}
       >
+        {/* Close */}
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
             top: '16px',
             right: '16px',
-            background: 'none',
-            border: 'none',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '4px',
+            padding: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s ease',
           }}
           aria-label="Close settings"
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
+        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-          <Settings size={22} style={{ color: 'var(--accent)' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            background: 'var(--accent-subtle)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Settings size={18} style={{ color: 'var(--accent)' }} />
+          </div>
+          <h2 style={{
+            fontFamily: 'var(--font-heading)',
+            fontSize: '1.2rem',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+          }}>
             Settings
           </h2>
         </div>
@@ -154,7 +176,14 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
         {/* Provider toggle */}
         <div style={{ marginBottom: '20px' }}>
           <label style={labelStyle}>API Provider</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            background: 'var(--bg-elevated)',
+            borderRadius: '12px',
+            padding: '4px',
+            border: '1px solid var(--border)',
+          }}>
             {([
               { value: 'openrouter' as Provider, label: 'OpenRouter' },
               { value: 'openai' as Provider, label: 'OpenAI Direct' },
@@ -172,16 +201,18 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
                 }}
                 style={{
                   flex: 1,
-                  padding: '10px 16px',
-                  background: provider === opt.value ? 'var(--accent)' : 'var(--bg-elevated)',
-                  color: provider === opt.value ? 'var(--bg-primary)' : 'var(--text-sub)',
-                  border: `1px solid ${provider === opt.value ? 'var(--accent)' : 'var(--border)'}`,
-                  borderRadius: '10px',
+                  padding: '8px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
                   cursor: 'pointer',
                   fontFamily: 'var(--font-heading)',
-                  fontWeight: provider === opt.value ? 600 : 400,
-                  fontSize: '0.88rem',
-                  transition: 'all 0.2s ease',
+                  fontWeight: provider === opt.value ? 600 : 500,
+                  fontSize: '0.85rem',
+                  color: provider === opt.value ? 'white' : 'var(--text-muted)',
+                  background: provider === opt.value
+                    ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
+                    : 'transparent',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
               >
                 {opt.label}
@@ -248,10 +279,12 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           </p>
         </div>
 
+        {/* Security note */}
         <div style={{
           padding: '12px 14px',
           background: 'var(--accent-subtle)',
-          borderRadius: '8px',
+          borderRadius: '10px',
+          border: '1px solid rgba(124, 92, 252, 0.08)',
           fontSize: '0.82rem',
           color: 'var(--text-sub)',
           lineHeight: 1.5,
@@ -260,17 +293,18 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           🔒 Your key is stored in your browser only and sent directly to {provider === 'openrouter' ? 'OpenRouter' : 'OpenAI'}. We never see or store it. Without a key, you&apos;ll get a basic keyword-based analysis.
         </div>
 
+        {/* Test message */}
         {testMessage && (
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             padding: '10px 14px',
-            background: testStatus === 'success' ? 'rgba(46, 196, 182, 0.1)' : 'rgba(255, 107, 107, 0.1)',
-            border: `1px solid ${testStatus === 'success' ? 'rgba(46, 196, 182, 0.2)' : 'rgba(255, 107, 107, 0.2)'}`,
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            color: testStatus === 'success' ? 'var(--accent)' : 'var(--error)',
+            background: testStatus === 'success' ? 'rgba(62, 207, 180, 0.08)' : 'rgba(255, 107, 107, 0.08)',
+            border: `1px solid ${testStatus === 'success' ? 'rgba(62, 207, 180, 0.15)' : 'rgba(255, 107, 107, 0.15)'}`,
+            borderRadius: '10px',
+            fontSize: '0.82rem',
+            color: testStatus === 'success' ? 'var(--success)' : 'var(--error)',
             marginBottom: '20px',
           }}>
             {testStatus === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
@@ -278,6 +312,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           </div>
         )}
 
+        {/* Action buttons */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={handleTest} className="btn-secondary" style={{ flex: 1 }} disabled={testStatus === 'testing'}>
             {testStatus === 'testing' ? <Loader2 size={16} className="animate-spin" /> : null}
@@ -300,7 +335,9 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
               color: 'var(--error)',
               fontSize: '0.82rem',
               cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 500,
+              transition: 'opacity 0.15s ease',
             }}
           >
             Clear stored key

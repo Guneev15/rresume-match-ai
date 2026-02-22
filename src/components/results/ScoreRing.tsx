@@ -1,135 +1,126 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 interface Props {
   score: number;
   size?: number;
+  label?: string;
 }
 
-function getScoreColor(score: number): string {
-  if (score >= 85) return '#2EC4B6';
-  if (score >= 70) return '#2EC4B6';
-  if (score >= 50) return '#FFB347';
-  return '#FF6B6B';
-}
-
-function getScoreLabel(score: number): string {
-  if (score >= 85) return 'Strong Match';
-  if (score >= 70) return 'Good Match';
-  if (score >= 50) return 'Moderate';
-  return 'Low Match';
-}
-
-export default function ScoreRing({ score, size = 160 }: Props) {
-  const [animatedScore, setAnimatedScore] = useState(0);
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
+export default function ScoreRing({ score, size = 110, label }: Props) {
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (animatedScore / 100) * circumference;
-  const color = getScoreColor(score);
-  const label = getScoreLabel(score);
+  const [displayScore, setDisplayScore] = useState(0);
+
+  const motionScore = useMotionValue(0);
+  const strokeDashoffset = useTransform(motionScore, [0, 100], [circumference, 0]);
 
   useEffect(() => {
-    let frame: number;
-    const duration = 1500;
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimatedScore(Math.round(score * eased));
-      if (progress < 1) frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [score]);
+    const controls = animate(motionScore, score, {
+      duration: 1.2,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => setDisplayScore(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [score, motionScore]);
+
+  const getColor = (s: number) => {
+    if (s >= 80) return 'var(--accent-secondary)';
+    if (s >= 60) return 'var(--accent)';
+    if (s >= 40) return 'var(--warning)';
+    return 'var(--error)';
+  };
+
+  const color = getColor(score);
 
   return (
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{
+    <div style={{
+      position: 'relative',
+      width: size,
+      height: size,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      {/* Glow */}
+      <div style={{
+        position: 'absolute',
+        inset: '-6px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
+        filter: 'blur(8px)',
+      }} />
+
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        style={{ transform: 'rotate(-90deg)', position: 'relative', zIndex: 1 }}
+      >
+        {/* Track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--bg-elevated)"
+          strokeWidth={strokeWidth}
+        />
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id={`scoreGradient-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--gradient-start)" />
+            <stop offset="100%" stopColor="var(--gradient-end)" />
+          </linearGradient>
+        </defs>
+        {/* Progress */}
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={`url(#scoreGradient-${size})`}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          style={{ strokeDashoffset }}
+        />
+      </svg>
+
+      {/* Center text */}
+      <div style={{
+        position: 'absolute',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '12px',
-      }}
-    >
-      <div style={{ position: 'relative', width: size, height: size }}>
-        <svg
-          width={size}
-          height={size}
-          viewBox={`0 0 ${size} ${size}`}
-          style={{ transform: 'rotate(-90deg)' }}
-        >
-          {/* Background circle */}
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="var(--bg-elevated)"
-            strokeWidth={strokeWidth}
-          />
-          {/* Score arc */}
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            style={{
-              transition: 'stroke-dashoffset 0.1s ease',
-              filter: `drop-shadow(0 0 8px ${color}40)`,
-            }}
-          />
-        </svg>
-        {/* Center score text */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{
-            fontFamily: 'var(--font-heading)',
-            fontSize: `${size / 4}px`,
-            fontWeight: 800,
-            color: color,
-            lineHeight: 1,
-          }}>
-            {animatedScore}
-          </span>
-          <span style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginTop: '4px',
-          }}>
-            / 100
-          </span>
-        </div>
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-heading)',
-        fontWeight: 600,
-        fontSize: '0.95rem',
-        color: color,
-        padding: '4px 14px',
-        background: `${color}15`,
-        borderRadius: '20px',
+        justifyContent: 'center',
+        zIndex: 2,
       }}>
-        {label}
+        <span style={{
+          fontFamily: 'var(--font-heading)',
+          fontSize: size > 80 ? '1.6rem' : '1.2rem',
+          fontWeight: 800,
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.02em',
+          lineHeight: 1,
+        }}>
+          {displayScore}
+        </span>
+        {label && (
+          <span style={{
+            fontSize: '0.7rem',
+            color: 'var(--text-muted)',
+            fontWeight: 500,
+            marginTop: '2px',
+            fontFamily: 'var(--font-heading)',
+          }}>
+            {label}
+          </span>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 }

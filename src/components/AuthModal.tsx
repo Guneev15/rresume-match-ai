@@ -99,13 +99,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     }
   };
 
+  const labelStyle = {
+    display: 'block' as const,
+    marginBottom: '8px',
+    fontSize: '0.82rem',
+    fontWeight: 600,
+    color: 'var(--text-sub)',
+    fontFamily: 'var(--font-heading)',
+    letterSpacing: '0.01em',
+  };
+
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.7)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -114,160 +125,118 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       onClick={onClose}
     >
       <div
+        className="glass-card"
         style={{
-          background: 'var(--bg-surface)',
-          borderRadius: '16px',
           padding: '32px',
           maxWidth: '420px',
           width: '90%',
           position: 'relative',
-          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(18, 18, 26, 0.9)',
+          border: '1px solid rgba(124, 92, 252, 0.1)',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(124, 92, 252, 0.05)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
             top: '16px',
             right: '16px',
-            background: 'none',
-            border: 'none',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '8px',
+            padding: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s ease',
           }}
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
-        <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--text-primary)' }}>
+        {/* Header */}
+        <h2 style={{
+          fontSize: '1.3rem',
+          fontWeight: 800,
+          fontFamily: 'var(--font-heading)',
+          marginBottom: '6px',
+          letterSpacing: '-0.02em',
+        }}>
           {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
         </h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.88rem' }}>
           {mode === 'signin'
             ? 'Sign in to access your career intelligence dashboard'
             : 'Join to unlock powerful career tools'}
         </p>
 
+        {/* Error */}
         {error && (
-          <div
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              padding: '12px',
-              marginBottom: '16px',
-              color: '#ef4444',
-              fontSize: '14px',
-            }}
-          >
+          <div style={{
+            background: 'rgba(255, 107, 107, 0.08)',
+            border: '1px solid rgba(255, 107, 107, 0.15)',
+            borderRadius: '10px',
+            padding: '12px',
+            marginBottom: '16px',
+            color: 'var(--error)',
+            fontSize: '0.85rem',
+          }}>
             {error}
           </div>
         )}
 
+        {/* Form */}
         <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp}>
           {mode === 'signup' && (
             <div style={{ marginBottom: '16px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontSize: '14px',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                Full Name
-              </label>
+              <label style={labelStyle}>Full Name</label>
               <input
                 type="text"
+                className="input"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: 'var(--bg-primary)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                }}
               />
             </div>
           )}
 
           <div style={{ marginBottom: '16px' }}>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontSize: '14px',
-                color: 'var(--text-primary)',
-              }}
-            >
-              Email
-            </label>
+            <label style={labelStyle}>Email</label>
             <input
               type="email"
+              className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: 'var(--bg-primary)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                color: 'var(--text-primary)',
-                fontSize: '14px',
-              }}
             />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontSize: '14px',
-                color: 'var(--text-primary)',
-              }}
-            >
-              Password
-            </label>
+            <label style={labelStyle}>Password</label>
             <input
               type="password"
+              className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: 'var(--bg-primary)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                color: 'var(--text-primary)',
-                fontSize: '14px',
-              }}
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
+            className="btn-primary"
             style={{
               width: '100%',
+              justifyContent: 'center',
               padding: '12px',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1,
+              fontSize: '0.95rem',
               marginBottom: '16px',
             }}
           >
@@ -275,49 +244,38 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           </button>
         </form>
 
+        {/* Divider */}
         <div style={{ position: 'relative', textAlign: 'center', marginBottom: '16px' }}>
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: 0,
-              right: 0,
-              height: '1px',
-              background: 'rgba(255,255,255,0.1)',
-            }}
-          />
-          <span
-            style={{
-              position: 'relative',
-              background: 'var(--bg-surface)',
-              padding: '0 16px',
-              color: 'var(--text-muted)',
-              fontSize: '14px',
-            }}
-          >
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'var(--border)',
+          }} />
+          <span style={{
+            position: 'relative',
+            background: 'rgba(18, 18, 26, 0.9)',
+            padding: '0 16px',
+            color: 'var(--text-muted)',
+            fontSize: '0.82rem',
+          }}>
             or
           </span>
         </div>
 
+        {/* Google */}
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
+          className="btn-secondary"
           style={{
             width: '100%',
-            padding: '12px',
-            background: 'var(--bg-primary)',
-            color: 'var(--text-primary)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
+            padding: '12px',
+            fontSize: '0.88rem',
+            marginBottom: '16px',
           }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
@@ -341,7 +299,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           Continue with Google
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--text-muted)' }}>
+        {/* Toggle */}
+        <p style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => {
@@ -353,7 +312,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               border: 'none',
               color: 'var(--accent)',
               cursor: 'pointer',
-              textDecoration: 'underline',
+              fontWeight: 600,
+              fontFamily: 'var(--font-heading)',
             }}
           >
             {mode === 'signin' ? 'Sign up' : 'Sign in'}

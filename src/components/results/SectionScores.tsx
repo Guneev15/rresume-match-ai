@@ -1,110 +1,111 @@
-'use client';
-
-import React from 'react';
 import { motion } from 'framer-motion';
-import { SectionScores as SectionScoresType } from '@/lib/types';
-import { Code, Briefcase, GraduationCap, FileCheck, Trophy } from 'lucide-react';
+import { BookOpen, Award, Briefcase, ShieldCheck, Star } from 'lucide-react';
 
-interface Props {
-  scores: SectionScoresType;
+interface SectionScore {
+  name: string;
+  score: number;
+  weight: number;
 }
 
-const SECTIONS = [
-  { key: 'skillsMatch' as const, label: 'Skills Match', icon: Code, weight: '40%' },
-  { key: 'experienceMatch' as const, label: 'Experience Match', icon: Briefcase, weight: '30%' },
-  { key: 'education' as const, label: 'Education & Certs', icon: GraduationCap, weight: '10%' },
-  { key: 'atsReadability' as const, label: 'ATS Readability', icon: FileCheck, weight: '10%' },
-  { key: 'achievementQuality' as const, label: 'Achievement Quality', icon: Trophy, weight: '10%' },
-];
+interface Props {
+  scores: SectionScore[];
+}
 
-function getBarColor(score: number): string {
-  if (score >= 80) return 'var(--accent)';
-  if (score >= 60) return '#FFB347';
-  return 'var(--error)';
+const SECTION_ICONS: Record<string, any> = {
+  'skills': BookOpen,
+  'experience': Briefcase,
+  'education': Award,
+  'ats': ShieldCheck,
+  'achievements': Star,
+};
+
+function getBarGradient(score: number): string {
+  if (score >= 80) return 'linear-gradient(90deg, var(--accent-secondary), #2de0a6)';
+  if (score >= 60) return 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end))';
+  if (score >= 40) return 'linear-gradient(90deg, var(--warning), #ffc966)';
+  return 'linear-gradient(90deg, var(--error), #ff9494)';
 }
 
 export default function SectionScores({ scores }: Props) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="card"
-    >
+    <div className="card" style={{ padding: '24px' }}>
       <h3 style={{
         fontFamily: 'var(--font-heading)',
-        fontSize: '1rem',
+        fontSize: '1.05rem',
         fontWeight: 700,
-        marginBottom: '24px',
+        marginBottom: '20px',
+        letterSpacing: '-0.01em',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
       }}>
-        📊 Section Breakdown
+        Score Breakdown
       </h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {SECTIONS.map((section, i) => {
-          const Icon = section.icon;
-          const score = scores[section.key];
-          const color = getBarColor(score);
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {scores.map((section, i) => {
+          const IconComp = SECTION_ICONS[section.name.toLowerCase()] || BookOpen;
           return (
             <motion.div
-              key={section.key}
-              initial={{ opacity: 0, x: -20 }}
+              key={section.name}
+              initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 + i * 0.08 }}
+              transition={{ duration: 0.4, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
             >
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '8px',
+                marginBottom: '7px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon size={16} style={{ color: 'var(--text-muted)' }} />
+                  <IconComp size={14} style={{ color: 'var(--text-muted)' }} />
                   <span style={{
-                    fontFamily: 'var(--font-heading)',
-                    fontWeight: 500,
-                    fontSize: '0.9rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
                     color: 'var(--text-primary)',
+                    fontFamily: 'var(--font-heading)',
+                    textTransform: 'capitalize',
                   }}>
-                    {section.label}
+                    {section.name}
                   </span>
                   <span style={{
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted)',
+                    fontSize: '0.7rem',
+                    padding: '2px 7px',
+                    borderRadius: '6px',
                     background: 'var(--bg-elevated)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
+                    color: 'var(--text-muted)',
+                    fontWeight: 500,
                   }}>
-                    {section.weight}
+                    ×{section.weight}
                   </span>
                 </div>
                 <span style={{
                   fontFamily: 'var(--font-heading)',
                   fontWeight: 700,
-                  fontSize: '0.95rem',
-                  color: color,
+                  fontSize: '0.88rem',
+                  color: 'var(--text-primary)',
                 }}>
-                  {score}
+                  {section.score}
                 </span>
               </div>
+
+              {/* Progress bar */}
               <div style={{
                 height: '6px',
                 background: 'var(--bg-elevated)',
-                borderRadius: '3px',
+                borderRadius: '999px',
                 overflow: 'hidden',
               }}>
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${score}%` }}
-                  transition={{ duration: 1, delay: 0.3 + i * 0.1 }}
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${section.score}%` }}
+                  transition={{ duration: 0.8, delay: 0.15 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
                   style={{
                     height: '100%',
-                    background: color,
-                    borderRadius: '3px',
-                    boxShadow: `0 0 8px ${color}40`,
+                    borderRadius: '999px',
+                    background: getBarGradient(section.score),
+                    boxShadow: section.score >= 60 ? `0 0 10px ${section.score >= 80 ? 'rgba(62, 207, 180, 0.25)' : 'rgba(124, 92, 252, 0.2)'}` : 'none',
                   }}
                 />
               </div>
@@ -112,6 +113,6 @@ export default function SectionScores({ scores }: Props) {
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }
