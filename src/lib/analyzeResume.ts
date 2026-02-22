@@ -30,9 +30,9 @@ export async function analyzeWithAI(
     : resumeText;
   const prompt = buildAnalysisPrompt(trimmedResume, job);
 
-  // Add 30-second timeout for faster analysis
+  // 60-second timeout — free-tier AI models can be slow
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  const timeout = setTimeout(() => controller.abort(), 60000);
 
   try {
     const response = await client.chat.completions.create({
@@ -56,33 +56,94 @@ export async function analyzeWithAI(
     throw new Error('No response from AI model');
   }
 
-  // Clean potential markdown code blocks from response
-  let cleaned = content
+  // Log raw response in dev mode for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[AI Raw Response]', content.substring(0, 500));
+  }
+
+  const parsed = extractJSON(content);
+  if (!parsed) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[AI Parse Failed] Full response:', content);
+    }
+    throw new Error('Failed to parse AI response. The model returned invalid JSON.');
+  }
+  return normalizeResult(parsed);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/**
+ * Robustly extract a JSON object from an AI response.
+ * Tries multiple strategies to handle common model output issues.
+ */
+function extractJSON(raw: string): Record<string, unknown> | null {
+  // Strategy 1: Clean markdown fences and try direct parse
+  let cleaned = raw
     .replace(/```json\s*/gi, '')
     .replace(/```\s*/g, '')
     .trim();
 
   try {
-    // Try parsing directly first
-    const parsed = JSON.parse(cleaned);
-    return normalizeResult(parsed);
-  } catch {
-    // If direct parse fails, try to extract JSON object
+    return JSON.parse(cleaned);
+  } catch {}
+
+  // Strategy 2: Extract JSON object with regex (greedy, outermost braces)
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
     try {
-      // Look for JSON object pattern
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return normalizeResult(parsed);
+      return JSON.parse(jsonMatch[0]);
+    } catch {}
+
+    // Strategy 3: Aggressively clean common AI quirks, then parse
+    try {
+      let aggressive = jsonMatch[0]
+        // Remove JS-style comments
+        .replace(/\/\/[^\n]*/g, '')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        // Remove trailing commas before } or ]
+        .replace(/,\s*([\]}])/g, '$1')
+        // Replace single quotes with double quotes (but not inside strings)
+        .replace(/'/g, '"')
+        // Remove control characters
+        .replace(/[\x00-\x1F\x7F]/g, (ch) => ch === '\n' || ch === '\t' ? ch : '')
+        // Fix unquoted keys: word: -> "word":
+        .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":')
+        // Remove duplicate double quotes from the above fix
+        .replace(/""+/g, '"');
+      return JSON.parse(aggressive);
+    } catch {}
+  }
+
+  // Strategy 4: Bracket-balanced extraction — find first valid { ... }
+  const startIdx = cleaned.indexOf('{');
+  if (startIdx !== -1) {
+    let depth = 0;
+    for (let i = startIdx; i < cleaned.length; i++) {
+      if (cleaned[i] === '{') depth++;
+      else if (cleaned[i] === '}') depth--;
+      if (depth === 0) {
+        const candidate = cleaned.substring(startIdx, i + 1);
+        try {
+          return JSON.parse(candidate);
+        } catch {
+          // Try with aggressive cleanup
+          try {
+            const aggressiveCandidate = candidate
+              .replace(/,\s*([\]}])/g, '$1')
+              .replace(/'/g, '"')
+              .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":')
+              .replace(/""+/g, '"');
+            return JSON.parse(aggressiveCandidate);
+          } catch {}
+        }
+        break;
       }
-      throw new Error('No JSON object found in response');
-    } catch (e) {
-      throw new Error('Failed to parse AI response. The model returned invalid JSON.');
     }
   }
-  } finally {
-    clearTimeout(timeout);
-  }
+
+  return null;
 }
 
 function normalizeResult(raw: Record<string, unknown>): AnalysisResult {
