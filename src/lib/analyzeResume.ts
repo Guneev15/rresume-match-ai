@@ -3,8 +3,10 @@ import { buildAnalysisPrompt } from './prompts';
 
 // Models to try in order — if the primary fails to return valid JSON, try the next
 const FALLBACK_MODELS = [
-  'meta-llama/llama-3.1-8b-instruct:free',
-  'google/gemma-2-9b-it:free',
+  'arcee-ai/trinity-large-preview:free',
+  'google/gemma-3-12b-it:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'mistralai/mistral-small-3.1-24b-instruct:free',
 ];
 
 export async function analyzeWithAI(
@@ -12,7 +14,7 @@ export async function analyzeWithAI(
   job: JobInput,
   apiKey: string
 ): Promise<AnalysisResult> {
-  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'arcee-ai/trinity-large-preview:free';
 
   // Trim resume text to first 3000 chars for speed
   const trimmedResume = resumeText.length > 3000 
@@ -55,7 +57,7 @@ async function callOpenRouter(
   prompt: string
 ): Promise<AnalysisResult | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 45000); // 45s per attempt
+  const timeout = setTimeout(() => controller.abort(), 90000); // 90s per attempt — free models can be slow
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {

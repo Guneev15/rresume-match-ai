@@ -92,7 +92,13 @@ export default function ResultsPage({ result, jobInput, onRecheck }: Props) {
 
       {/* Section Scores */}
       <motion.div variants={fadeUp}>
-        <SectionScores scores={result.sectionScores as any} />
+        <SectionScores scores={[
+          { name: 'Skills', score: result.sectionScores.skillsMatch, weight: 30 },
+          { name: 'Experience', score: result.sectionScores.experienceMatch, weight: 25 },
+          { name: 'Education', score: result.sectionScores.education, weight: 15 },
+          { name: 'ATS', score: result.sectionScores.atsReadability, weight: 15 },
+          { name: 'Achievements', score: result.sectionScores.achievementQuality, weight: 15 },
+        ]} />
       </motion.div>
 
       {/* Action Items */}
