@@ -30,8 +30,8 @@ export default function ResultsPage({ result, jobInput, onRecheck }: Props) {
   };
 
   const fadeUp = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] } },
   };
 
   return (
@@ -59,7 +59,7 @@ export default function ResultsPage({ result, jobInput, onRecheck }: Props) {
             letterSpacing: '-0.02em',
             marginBottom: '4px',
           }}>
-            Analysis <span className="gradient-text">Results</span>
+            Analysis <span style={{ color: 'var(--accent)' }}>Results</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
             {jobInput.jobTitle} · {jobInput.seniority} · {jobInput.industry || 'General'}

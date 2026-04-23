@@ -175,13 +175,13 @@ export default function Home() {
   };
 
   const staggerItem = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] } },
   };
 
   return (
     <>
-      {/* ── Navbar ── */}
+      {/* ── Navbar — Clean, solid, no blur ── */}
       <nav style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -190,9 +190,7 @@ export default function Home() {
         borderBottom: '1px solid var(--border)',
         position: 'sticky',
         top: 0,
-        background: 'rgba(10, 10, 15, 0.8)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        background: 'var(--bg-primary)',
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -200,7 +198,7 @@ export default function Home() {
             width: '32px',
             height: '32px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+            background: 'var(--accent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -209,13 +207,12 @@ export default function Home() {
           </div>
           <span style={{
             fontFamily: 'var(--font-heading)',
-            fontWeight: 800,
+            fontWeight: 700,
             fontSize: '1.1rem',
             color: 'var(--text-primary)',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.02em',
           }}>
-            ResumeMatch
-            <span className="gradient-text">AI</span>
+            ResumeMatch<span style={{ color: 'var(--accent)' }}>AI</span>
           </span>
         </div>
         
@@ -226,7 +223,6 @@ export default function Home() {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '12px',
-                color: 'var(--text-muted)',
                 fontSize: '14px',
               }}>
                 <span style={{ color: 'var(--text-sub)' }}>👋 {profile?.full_name || user.email}</span>
@@ -236,25 +232,10 @@ export default function Home() {
                     await signOut();
                     window.location.reload();
                   }}
+                  className="btn-ghost"
                   style={{
-                    padding: '6px 14px',
-                    background: 'rgba(255, 107, 107, 0.08)',
-                    color: '#FF6B6B',
-                    border: '1px solid rgba(255, 107, 107, 0.15)',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
+                    color: 'var(--error)',
                     fontSize: '13px',
-                    fontWeight: '500',
-                    fontFamily: 'var(--font-heading)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 107, 0.15)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 107, 107, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 107, 0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 107, 107, 0.15)';
                   }}
                 >
                   Sign Out
@@ -288,55 +269,56 @@ export default function Home() {
           {appState === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
             >
-              {/* ── Hero — SEO Optimized ── */}
+              {/* ── Hero — Clean & warm ── */}
               <div style={{
                 textAlign: 'center',
                 marginBottom: '48px',
-                marginTop: '32px',
+                marginTop: '40px',
                 position: 'relative',
               }}>
-                {/* Gradient glow behind hero */}
+                {/* Subtle radial glow — very faint */}
                 <div style={{
                   position: 'absolute',
-                  top: '-60px',
+                  top: '-80px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: '400px',
-                  height: '200px',
-                  background: 'radial-gradient(ellipse, rgba(124, 92, 252, 0.12) 0%, rgba(62, 207, 180, 0.06) 50%, transparent 80%)',
+                  width: '500px',
+                  height: '250px',
+                  background: 'radial-gradient(ellipse, rgba(44, 182, 125, 0.06) 0%, transparent 70%)',
                   pointerEvents: 'none',
-                  filter: 'blur(40px)',
+                  filter: 'blur(60px)',
                 }} />
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+                  transition={{ duration: 0.6, delay: 0.1, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
                 >
                   <h1 style={{
                     fontFamily: 'var(--font-heading)',
-                    fontSize: 'clamp(2rem, 4.5vw, 2.8rem)',
-                    fontWeight: 800,
-                    lineHeight: 1.1,
+                    fontSize: 'clamp(2rem, 4.5vw, 2.6rem)',
+                    fontWeight: 700,
+                    lineHeight: 1.15,
                     marginBottom: '20px',
-                    letterSpacing: '-0.02em',
+                    letterSpacing: '-0.03em',
+                    color: 'var(--text-primary)',
                     position: 'relative',
                   }}>
                     AI Resume Analyzer &amp;
                     <br />
-                    <span className="gradient-text">Job Match Optimizer</span>
+                    <span style={{ color: 'var(--accent)' }}>Job Match Optimizer</span>
                   </h1>
                 </motion.div>
 
                 <motion.p
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  transition={{ duration: 0.5, delay: 0.25, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
                   style={{
                     color: 'var(--text-sub)',
                     fontSize: '1.05rem',
@@ -346,13 +328,11 @@ export default function Home() {
                   }}
                 >
                   Upload your resume to instantly check job compatibility, ATS score,
-                  and improvement suggestions. Our AI-powered resume analyzer helps
-                  optimize keywords, skills, and structure to match real job profiles
-                  — giving you a smarter edge in applications.
+                  and improvement suggestions — giving you a smarter edge in applications.
                 </motion.p>
               </div>
 
-              {/* ── Feature Cards — SEO Semantic Headings ── */}
+              {/* ── Feature Cards ── */}
               <motion.div
                 variants={staggerContainer}
                 initial="hidden"
@@ -360,20 +340,20 @@ export default function Home() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '14px',
+                  gap: '16px',
                   marginBottom: '40px',
                 }}
               >
                 {[
-                  { icon: Target, title: 'Resume Job Matching', desc: 'Analyze how well your resume aligns with specific job roles using intelligent keyword and skill matching.' },
-                  { icon: ShieldCheck, title: 'ATS Optimization', desc: 'Ensure your resume passes applicant tracking systems with optimized formatting and targeted keywords.' },
-                  { icon: Lightbulb, title: 'Smart Resume Feedback', desc: 'Get personalized insights on what to improve, rewrite, or highlight to increase interview chances.' },
+                  { icon: Target, title: 'Resume Job Matching', desc: 'See how well your resume aligns with specific roles using intelligent skill matching.' },
+                  { icon: ShieldCheck, title: 'ATS Optimization', desc: 'Ensure your resume passes applicant tracking systems with targeted keywords.' },
+                  { icon: Lightbulb, title: 'Smart Feedback', desc: 'Get personalized insights on what to improve, rewrite, or highlight.' },
                 ].map((card) => (
                   <motion.div
                     key={card.title}
                     variants={staggerItem}
-                    className="glass-card hover-lift"
-                    style={{ textAlign: 'center', padding: '24px 20px' }}
+                    className="card-interactive"
+                    style={{ textAlign: 'center', padding: '24px 20px', cursor: 'default' }}
                   >
                     <div style={{
                       width: '44px',
@@ -390,7 +370,7 @@ export default function Home() {
                     <h2 style={{
                       fontFamily: 'var(--font-heading)',
                       fontSize: '0.92rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       marginBottom: '8px',
                       letterSpacing: '-0.01em',
                     }}>
@@ -408,14 +388,14 @@ export default function Home() {
                 variants={staggerContainer}
                 initial="hidden"
                 animate="show"
-                style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
               >
                 {/* Step 1 — Target Job */}
-                <motion.div variants={staggerItem} className="card">
+                <motion.div variants={staggerItem} className="card-elevated">
                   <h2 style={{
                     fontFamily: 'var(--font-heading)',
                     fontSize: '1rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     marginBottom: '20px',
                     display: 'flex',
                     alignItems: 'center',
@@ -425,7 +405,7 @@ export default function Home() {
                       width: '26px',
                       height: '26px',
                       borderRadius: '8px',
-                      background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+                      background: 'var(--accent)',
                       color: 'white',
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -441,11 +421,11 @@ export default function Home() {
                 </motion.div>
 
                 {/* Step 2 — Resume */}
-                <motion.div variants={staggerItem} className="card">
+                <motion.div variants={staggerItem} className="card-elevated">
                   <h2 style={{
                     fontFamily: 'var(--font-heading)',
                     fontSize: '1rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     marginBottom: '20px',
                     display: 'flex',
                     alignItems: 'center',
@@ -455,7 +435,7 @@ export default function Home() {
                       width: '26px',
                       height: '26px',
                       borderRadius: '8px',
-                      background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+                      background: 'var(--accent)',
                       color: 'white',
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -494,8 +474,8 @@ export default function Home() {
                           alignItems: 'flex-start',
                           gap: '8px',
                           padding: '10px 14px',
-                          background: 'rgba(255, 179, 71, 0.06)',
-                          border: '1px solid rgba(255, 179, 71, 0.12)',
+                          background: 'rgba(245, 158, 11, 0.06)',
+                          border: '1px solid rgba(245, 158, 11, 0.1)',
                           borderRadius: '10px',
                           fontSize: '0.82rem',
                           color: 'var(--warning)',
@@ -513,17 +493,17 @@ export default function Home() {
                 <AnimatePresence>
                   {error && (
                     <motion.div
-                      initial={{ opacity: 0, y: -8 }}
+                      initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.25 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2 }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px',
                         padding: '12px 16px',
-                        background: 'rgba(255, 107, 107, 0.08)',
-                        border: '1px solid rgba(255, 107, 107, 0.15)',
+                        background: 'rgba(239, 68, 68, 0.06)',
+                        border: '1px solid rgba(239, 68, 68, 0.1)',
                         borderRadius: '12px',
                         color: 'var(--error)',
                         fontSize: '0.9rem',
@@ -552,6 +532,20 @@ export default function Home() {
                     <Sparkles size={18} />
                     Analyze My Resume
                   </button>
+                  {!isReadyToAnalyze && (
+                    <p style={{
+                      textAlign: 'center',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-muted)',
+                      marginTop: '10px',
+                    }}>
+                      {!jobInput.jobTitle.trim() && !(resumeFile || resumeText.trim())
+                        ? 'Enter a target role and upload your resume to get started'
+                        : !jobInput.jobTitle.trim()
+                          ? 'Enter a target role above to enable analysis'
+                          : 'Upload or paste your resume above to enable analysis'}
+                    </p>
+                  )}
                 </motion.div>
 
               </motion.div>
@@ -564,7 +558,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.25 }}
             >
               <AnalysisLoader />
             </motion.div>
@@ -573,10 +567,10 @@ export default function Home() {
           {appState === 'results' && result && (
             <motion.div
               key="results"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
             >
               {/* Parse warnings at top of results */}
               {parseWarnings.length > 0 && (
@@ -587,8 +581,8 @@ export default function Home() {
                       alignItems: 'flex-start',
                       gap: '8px',
                       padding: '10px 14px',
-                      background: 'rgba(255, 179, 71, 0.06)',
-                      border: '1px solid rgba(255, 179, 71, 0.12)',
+                      background: 'rgba(245, 158, 11, 0.06)',
+                      border: '1px solid rgba(245, 158, 11, 0.1)',
                       borderRadius: '10px',
                       fontSize: '0.82rem',
                       color: 'var(--warning)',
@@ -613,7 +607,7 @@ export default function Home() {
         </AnimatePresence>
       </main>
 
-      {/* ── Footer — SEO + Trust ── */}
+      {/* ── Footer — Single line, clean ── */}
       <footer style={{
         padding: '20px 24px',
         borderTop: '1px solid var(--border)',
@@ -621,14 +615,8 @@ export default function Home() {
         color: 'var(--text-muted)',
         fontSize: '0.78rem',
         fontFamily: 'var(--font-body)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px',
       }}>
-        <span>© {new Date().getFullYear()} ResumeMatchAI — All rights reserved.</span>
-        <span style={{ fontSize: '0.72rem', color: 'rgba(107, 107, 141, 0.7)' }}>
-          Resume analysis and job matching insights are for guidance purposes only. Your data stays in your browser.
-        </span>
+        <span>© {new Date().getFullYear()} ResumeMatchAI — Your data stays in your browser.</span>
       </footer>
 
       {/* Auth Modal */}
@@ -641,3 +629,4 @@ export default function Home() {
     </>
   );
 }
+

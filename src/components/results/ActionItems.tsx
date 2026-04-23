@@ -13,16 +13,16 @@ interface Props {
 }
 
 const PRIORITY_STYLES: Record<string, { bg: string; border: string; color: string; icon: any }> = {
-  high: { bg: 'rgba(255, 107, 107, 0.08)', border: 'rgba(255, 107, 107, 0.15)', color: '#FF6B6B', icon: AlertTriangle },
-  medium: { bg: 'rgba(255, 179, 71, 0.08)', border: 'rgba(255, 179, 71, 0.15)', color: '#FFB347', icon: ArrowUpCircle },
-  low: { bg: 'rgba(62, 207, 180, 0.08)', border: 'rgba(62, 207, 180, 0.15)', color: '#3ECFB4', icon: Info },
+  high: { bg: 'rgba(239, 68, 68, 0.06)', border: 'rgba(239, 68, 68, 0.12)', color: 'var(--error)', icon: AlertTriangle },
+  medium: { bg: 'rgba(245, 158, 11, 0.06)', border: 'rgba(245, 158, 11, 0.12)', color: 'var(--warning)', icon: ArrowUpCircle },
+  low: { bg: 'rgba(44, 182, 125, 0.06)', border: 'rgba(44, 182, 125, 0.12)', color: 'var(--accent)', icon: Info },
 };
 
 export default function ActionItems({ items }: Props) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   return (
-    <div className="card" style={{ padding: '24px' }}>
+    <div className="card-elevated" style={{ padding: '24px' }}>
       <h3 style={{
         fontFamily: 'var(--font-heading)',
         fontSize: '1.05rem',
@@ -120,7 +120,7 @@ export default function ActionItems({ items }: Props) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     style={{ overflow: 'hidden' }}
                   >
                     <div style={{

@@ -19,16 +19,16 @@ const SECTION_ICONS: Record<string, any> = {
   'achievements': Star,
 };
 
-function getBarGradient(score: number): string {
-  if (score >= 80) return 'linear-gradient(90deg, var(--accent-secondary), #2de0a6)';
-  if (score >= 60) return 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end))';
-  if (score >= 40) return 'linear-gradient(90deg, var(--warning), #ffc966)';
-  return 'linear-gradient(90deg, var(--error), #ff9494)';
+function getBarColor(score: number): string {
+  if (score >= 80) return 'var(--success)';
+  if (score >= 60) return 'var(--accent)';
+  if (score >= 40) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 export default function SectionScores({ scores }: Props) {
   return (
-    <div className="card" style={{ padding: '24px' }}>
+    <div className="card-elevated" style={{ padding: '24px' }}>
       <h3 style={{
         fontFamily: 'var(--font-heading)',
         fontSize: '1.05rem',
@@ -50,7 +50,7 @@ export default function SectionScores({ scores }: Props) {
               key={section.name}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3, delay: i * 0.06, ease: [0.4, 0, 0.2, 1] }}
             >
               <div style={{
                 display: 'flex',
@@ -100,12 +100,11 @@ export default function SectionScores({ scores }: Props) {
                 <motion.div
                   initial={{ width: '0%' }}
                   animate={{ width: `${section.score}%` }}
-                  transition={{ duration: 0.8, delay: 0.15 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.6, delay: 0.1 + i * 0.06, ease: [0.4, 0, 0.2, 1] }}
                   style={{
                     height: '100%',
                     borderRadius: '999px',
-                    background: getBarGradient(section.score),
-                    boxShadow: section.score >= 60 ? `0 0 10px ${section.score >= 80 ? 'rgba(62, 207, 180, 0.25)' : 'rgba(124, 92, 252, 0.2)'}` : 'none',
+                    background: getBarColor(section.score),
                   }}
                 />
               </div>

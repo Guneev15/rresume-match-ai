@@ -90,14 +90,12 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
             fontWeight: mode === 'upload' ? 600 : 500,
             fontFamily: 'var(--font-heading)',
             color: mode === 'upload' ? 'white' : 'var(--text-muted)',
-            background: mode === 'upload'
-              ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
-              : 'transparent',
+            background: mode === 'upload' ? 'var(--accent)' : 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.2s var(--ease-standard)',
           }}
         >
           <Upload size={14} /> Upload File
@@ -115,14 +113,12 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
             fontWeight: mode === 'paste' ? 600 : 500,
             fontFamily: 'var(--font-heading)',
             color: mode === 'paste' ? 'white' : 'var(--text-muted)',
-            background: mode === 'paste'
-              ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
-              : 'transparent',
+            background: mode === 'paste' ? 'var(--accent)' : 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.2s var(--ease-standard)',
           }}
         >
           <FileText size={14} /> Paste Text
@@ -143,9 +139,9 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
               padding: selectedFile ? '20px' : '40px 24px',
               textAlign: 'center',
               cursor: selectedFile ? 'default' : 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-              background: dragOver ? 'var(--accent-subtle)' : 'rgba(18, 18, 26, 0.4)',
-              boxShadow: dragOver ? '0 0 24px var(--accent-glow)' : 'none',
+              transition: 'all 0.2s var(--ease-standard)',
+              background: dragOver ? 'var(--accent-subtle)' : 'var(--bg-elevated)',
+              boxShadow: dragOver ? '0 0 16px var(--accent-glow)' : 'none',
             }}
           >
             {selectedFile ? (
@@ -154,7 +150,7 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
                   width: '40px',
                   height: '40px',
                   borderRadius: '10px',
-                  background: 'rgba(62, 207, 180, 0.1)',
+                  background: 'rgba(34, 197, 94, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -178,8 +174,8 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
                 <button
                   onClick={(e) => { e.stopPropagation(); removeFile(); }}
                   style={{
-                    background: 'rgba(255, 107, 107, 0.08)',
-                    border: '1px solid rgba(255, 107, 107, 0.12)',
+                    background: 'rgba(239, 68, 68, 0.06)',
+                    border: '1px solid rgba(239, 68, 68, 0.1)',
                     borderRadius: '8px',
                     width: '32px',
                     height: '32px',
@@ -257,8 +253,8 @@ export default function ResumeUpload({ onFileSelected, onTextPaste, initialText 
           alignItems: 'center',
           gap: '8px',
           padding: '10px 14px',
-          background: 'rgba(255, 107, 107, 0.06)',
-          border: '1px solid rgba(255, 107, 107, 0.12)',
+          background: 'rgba(239, 68, 68, 0.06)',
+          border: '1px solid rgba(239, 68, 68, 0.1)',
           borderRadius: '10px',
           color: 'var(--error)',
           fontSize: '0.82rem',

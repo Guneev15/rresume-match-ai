@@ -97,11 +97,9 @@ export default function JobRoleInput({ onChange, initialValues }: Props) {
                 fontFamily: 'var(--font-heading)',
                 textTransform: 'capitalize',
                 color: seniority === level ? 'white' : 'var(--text-muted)',
-                background: seniority === level
-                  ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
-                  : 'transparent',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: seniority === level ? '0 2px 8px var(--accent-glow)' : 'none',
+                background: seniority === level ? 'var(--accent)' : 'transparent',
+                transition: 'all 0.2s var(--ease-standard)',
+                boxShadow: 'none',
               }}
             >
               {level}

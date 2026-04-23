@@ -24,7 +24,7 @@ export default function KeywordsATS({ keywords, atsChecklist }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Keywords */}
-      <div className="card" style={{ padding: '24px' }}>
+      <div className="card-elevated" style={{ padding: '24px' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -69,7 +69,7 @@ export default function KeywordsATS({ keywords, atsChecklist }: Props) {
       </div>
 
       {/* ATS Checklist */}
-      <div className="card" style={{ padding: '24px' }}>
+      <div className="card-elevated" style={{ padding: '24px' }}>
         <h3 style={{
           fontFamily: 'var(--font-heading)',
           fontSize: '1.05rem',
@@ -87,8 +87,8 @@ export default function KeywordsATS({ keywords, atsChecklist }: Props) {
             padding: '3px 8px',
             borderRadius: '6px',
             background: atsChecklist.filter(a => a.passed).length === atsChecklist.length 
-              ? 'rgba(62, 207, 180, 0.1)' 
-              : 'rgba(255, 179, 71, 0.1)',
+              ? 'rgba(34, 197, 94, 0.1)' 
+              : 'rgba(245, 158, 11, 0.1)',
             color: atsChecklist.filter(a => a.passed).length === atsChecklist.length 
               ? 'var(--success)' 
               : 'var(--warning)',
@@ -112,12 +112,12 @@ export default function KeywordsATS({ keywords, atsChecklist }: Props) {
                 padding: '10px 12px',
                 borderRadius: '10px',
                 background: item.passed
-                  ? 'rgba(62, 207, 180, 0.04)'
-                  : 'rgba(255, 107, 107, 0.04)',
+                  ? 'rgba(34, 197, 94, 0.04)'
+                  : 'rgba(239, 68, 68, 0.04)',
                 border: '1px solid',
                 borderColor: item.passed
-                  ? 'rgba(62, 207, 180, 0.08)'
-                  : 'rgba(255, 107, 107, 0.08)',
+                  ? 'rgba(34, 197, 94, 0.08)'
+                  : 'rgba(239, 68, 68, 0.08)',
                 transition: 'all 0.2s ease',
               }}
             >

@@ -58,24 +58,24 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
           width: '48px',
           height: '48px',
           borderRadius: '14px',
-          background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+          background: 'var(--accent)',
           color: 'white',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 16px var(--accent-glow)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           zIndex: 1000,
-          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: 'all 0.2s var(--ease-standard)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.08) translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 24px var(--accent-glow)';
+          e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 16px var(--accent-glow)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
         <MessageSquare size={20} />
@@ -88,18 +88,18 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-card"
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="card-elevated"
             style={{
               position: 'fixed',
               bottom: '80px',
               right: '24px',
               width: '320px',
-              background: 'rgba(18, 18, 26, 0.95)',
-              border: '1px solid rgba(124, 92, 252, 0.12)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
               overflow: 'hidden',
               zIndex: 1001,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(124, 92, 252, 0.06)',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
               padding: 0,
             }}
           >
@@ -149,7 +149,7 @@ export default function FeedbackWidget({ featureId, featureLabel }: Props) {
                     width: '48px',
                     height: '48px',
                     borderRadius: '14px',
-                    background: 'rgba(62, 207, 180, 0.1)',
+                    background: 'rgba(34, 197, 94, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
