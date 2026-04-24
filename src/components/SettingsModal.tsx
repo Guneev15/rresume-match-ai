@@ -114,7 +114,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="card-elevated"
+        className="glass-card"
         style={{
           padding: '32px',
           maxWidth: '480px',
@@ -122,9 +122,9 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           position: 'relative',
           maxHeight: '90vh',
           overflowY: 'auto',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
-          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5)',
+          background: 'rgba(18, 18, 26, 0.9)',
+          border: '1px solid rgba(124, 92, 252, 0.1)',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(124, 92, 252, 0.05)',
         }}
       >
         {/* Close */}
@@ -209,8 +209,10 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
                   fontWeight: provider === opt.value ? 600 : 500,
                   fontSize: '0.85rem',
                   color: provider === opt.value ? 'white' : 'var(--text-muted)',
-                  background: provider === opt.value ? 'var(--accent)' : 'transparent',
-                  transition: 'all 0.2s var(--ease-standard)',
+                  background: provider === opt.value
+                    ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
+                    : 'transparent',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
               >
                 {opt.label}
@@ -282,7 +284,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           padding: '12px 14px',
           background: 'var(--accent-subtle)',
           borderRadius: '10px',
-          border: '1px solid var(--accent-subtle)',
+          border: '1px solid rgba(124, 92, 252, 0.08)',
           fontSize: '0.82rem',
           color: 'var(--text-sub)',
           lineHeight: 1.5,
@@ -298,8 +300,8 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
             alignItems: 'center',
             gap: '8px',
             padding: '10px 14px',
-            background: testStatus === 'success' ? 'rgba(34, 197, 94, 0.06)' : 'rgba(239, 68, 68, 0.06)',
-            border: `1px solid ${testStatus === 'success' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)'}`,
+            background: testStatus === 'success' ? 'rgba(62, 207, 180, 0.08)' : 'rgba(255, 107, 107, 0.08)',
+            border: `1px solid ${testStatus === 'success' ? 'rgba(62, 207, 180, 0.15)' : 'rgba(255, 107, 107, 0.15)'}`,
             borderRadius: '10px',
             fontSize: '0.82rem',
             color: testStatus === 'success' ? 'var(--success)' : 'var(--error)',

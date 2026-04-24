@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, TrendingUp, BookOpen, FileText, PenTool, MessageSquare, GraduationCap, Linkedin, ArrowLeft } from 'lucide-react';
+import { Briefcase, TrendingUp, BookOpen, FileText, PenTool, MessageSquare, GraduationCap, Linkedin } from 'lucide-react';
 import { AnalysisResult, ResumeData, JobInput } from '@/lib/types';
 import ResultsPage from '@/components/ResultsPage';
 import JobRecommendations from '@/features/job-recommendations/JobRecommendations';
@@ -25,7 +25,7 @@ export default function Dashboard({ result, resumeData, jobInput, onBack }: Dash
   const [activeTab, setActiveTab] = useState<TabType>('analysis');
 
   const tabs = [
-    { id: 'analysis' as TabType, label: 'Overview', icon: FileText },
+    { id: 'analysis' as TabType, label: 'Analysis', icon: FileText },
     { id: 'jobs' as TabType, label: 'Job Matches', icon: Briefcase },
     { id: 'skills' as TabType, label: 'Skill Gap', icon: TrendingUp },
     { id: 'coverletter' as TabType, label: 'Cover Letter', icon: PenTool },
@@ -36,39 +36,61 @@ export default function Dashboard({ result, resumeData, jobInput, onBack }: Dash
   ];
 
   const contentTransition = {
-    initial: { opacity: 0, y: 12 },
+    initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -6 },
-    transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Sub-header with job info */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
         style={{
           background: 'var(--bg-surface)',
           borderBottom: '1px solid var(--border)',
-          padding: '14px 24px',
+          padding: '16px 24px',
+          position: 'relative',
         }}
       >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Gradient accent line at top */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end))',
+          opacity: 0.6,
+        }} />
+
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 style={{
-              fontSize: '17px',
-              fontWeight: 600,
+              fontSize: '18px',
+              fontWeight: '700',
               color: 'var(--text-primary)',
               marginBottom: '3px',
               fontFamily: 'var(--font-heading)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.01em',
             }}>
               {jobInput.jobTitle}
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="score-badge" style={{ fontSize: '12px', padding: '2px 8px' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                background: 'var(--accent-subtle)',
+                color: 'var(--accent)',
+                fontWeight: 600,
+                fontSize: '12px',
+                fontFamily: 'var(--font-heading)',
+              }}>
                 {result.overallScore}/100
               </span>
               <span>·</span>
@@ -79,75 +101,35 @@ export default function Dashboard({ result, resumeData, jobInput, onBack }: Dash
           </div>
           <button
             onClick={onBack}
-            className="btn-secondary"
+            className="btn-primary"
             style={{
-              padding: '8px 16px',
+              padding: '8px 18px',
               fontSize: '13px',
-              gap: '6px',
             }}
           >
-            <ArrowLeft size={14} />
             New Analysis
           </button>
         </div>
       </motion.div>
 
-      {/* Main layout — Sidebar + Content */}
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        display: 'flex',
-        gap: '0',
-        minHeight: 'calc(100vh - 72px)',
-      }}>
-        {/* ── Desktop Sidebar ── */}
-        <aside style={{
-          width: '220px',
-          flexShrink: 0,
-          borderRight: '1px solid var(--border)',
-          padding: '20px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
+      {/* Tabs - Pill style, Scrollable */}
+      <div
+        style={{
+          background: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border)',
+          overflowX: 'auto',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
         }}
-        className="dashboard-sidebar"
-        >
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`sidebar-item ${isActive ? 'active' : ''}`}
-                style={{
-                  border: 'none',
-                  width: '100%',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                }}
-              >
-                <Icon size={16} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </aside>
-
-        {/* ── Mobile Tab Bar (hidden on desktop) ── */}
-        <div
-          className="dashboard-mobile-tabs"
-          style={{
-            display: 'none',
-            overflowX: 'auto',
-            borderBottom: '1px solid var(--border)',
-            background: 'var(--bg-surface)',
-            padding: '8px 16px',
-            gap: '4px',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none',
-          }}
-        >
+      >
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          gap: '4px',
+          padding: '8px 24px',
+          minWidth: 'fit-content',
+        }}>
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -156,102 +138,89 @@ export default function Dashboard({ result, resumeData, jobInput, onBack }: Dash
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '8px 14px',
+                  padding: '8px 16px',
                   background: isActive ? 'var(--accent-subtle)' : 'transparent',
-                  border: 'none',
+                  border: isActive ? '1px solid rgba(124, 92, 252, 0.15)' : '1px solid transparent',
                   borderRadius: '10px',
                   color: isActive ? 'var(--accent)' : 'var(--text-muted)',
                   cursor: 'pointer',
                   fontSize: '13px',
-                  fontWeight: isActive ? 600 : 500,
+                  fontWeight: isActive ? '600' : '500',
                   fontFamily: 'var(--font-heading)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.2s var(--ease-standard)',
-                  flexShrink: 0,
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
               >
-                <Icon size={14} />
+                <Icon size={15} />
                 {tab.label}
               </button>
             );
           })}
         </div>
+      </div>
 
-        {/* ── Content ── */}
-        <div style={{ flex: 1, padding: '24px', minWidth: 0 }}>
-          <AnimatePresence mode="wait">
-            {activeTab === 'analysis' && (
-              <motion.div key="analysis" {...contentTransition}>
-                <ResultsPage result={result} jobInput={jobInput} onRecheck={onBack} />
-              </motion.div>
-            )}
+      {/* Content */}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        <AnimatePresence mode="wait">
+          {activeTab === 'analysis' && (
+            <motion.div key="analysis" {...contentTransition}>
+              <ResultsPage result={result} jobInput={jobInput} onRecheck={onBack} />
+            </motion.div>
+          )}
 
-            {activeTab === 'jobs' && (
-              <motion.div key="jobs" {...contentTransition}>
-                <JobRecommendations resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'jobs' && (
+            <motion.div key="jobs" {...contentTransition}>
+              <JobRecommendations resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'skills' && (
-              <motion.div key="skills" {...contentTransition}>
-                <SkillGapDashboard resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'skills' && (
+            <motion.div key="skills" {...contentTransition}>
+              <SkillGapDashboard resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'coverletter' && (
-              <motion.div key="coverletter" {...contentTransition}>
-                <CoverLetterGenerator resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'coverletter' && (
+            <motion.div key="coverletter" {...contentTransition}>
+              <CoverLetterGenerator resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'interview' && (
-              <motion.div key="interview" {...contentTransition}>
-                <InterviewPrepEngine resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'interview' && (
+            <motion.div key="interview" {...contentTransition}>
+              <InterviewPrepEngine resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'learning' && (
-              <motion.div key="learning" {...contentTransition}>
-                <LearningRoadmapView resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'learning' && (
+            <motion.div key="learning" {...contentTransition}>
+              <LearningRoadmapView resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'linkedin' && (
-              <motion.div key="linkedin" {...contentTransition}>
-                <LinkedInTools resume={resumeData} jobInput={jobInput} />
-              </motion.div>
-            )}
+          {activeTab === 'linkedin' && (
+            <motion.div key="linkedin" {...contentTransition}>
+              <LinkedInTools resume={resumeData} jobInput={jobInput} />
+            </motion.div>
+          )}
 
-            {activeTab === 'versions' && (
-              <motion.div key="versions" {...contentTransition}>
-                <ResumeVersions
-                  currentResume={resumeData}
-                  currentJob={jobInput}
-                  currentAnalysis={result}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          {activeTab === 'versions' && (
+            <motion.div key="versions" {...contentTransition}>
+              <ResumeVersions
+                currentResume={resumeData}
+                currentJob={jobInput}
+                currentAnalysis={result}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Feedback Widget */}
       <FeedbackWidget featureId={activeTab} featureLabel={tabs.find(t => t.id === activeTab)?.label || 'Feature'} />
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .dashboard-sidebar {
-            display: none !important;
-          }
-          .dashboard-mobile-tabs {
-            display: flex !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

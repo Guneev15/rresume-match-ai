@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ScoreRing({ score, size = 110, label }: Props) {
-  const strokeWidth = 4;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
   const [displayScore, setDisplayScore] = useState(0);
@@ -20,15 +20,15 @@ export default function ScoreRing({ score, size = 110, label }: Props) {
 
   useEffect(() => {
     const controls = animate(motionScore, score, {
-      duration: 1,
-      ease: [0.4, 0, 0.2, 1],
+      duration: 1.2,
+      ease: [0.16, 1, 0.3, 1],
       onUpdate: (v) => setDisplayScore(Math.round(v)),
     });
     return () => controls.stop();
   }, [score, motionScore]);
 
   const getColor = (s: number) => {
-    if (s >= 80) return 'var(--success)';
+    if (s >= 80) return 'var(--accent-secondary)';
     if (s >= 60) return 'var(--accent)';
     if (s >= 40) return 'var(--warning)';
     return 'var(--error)';
@@ -45,11 +45,20 @@ export default function ScoreRing({ score, size = 110, label }: Props) {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
+      {/* Glow */}
+      <div style={{
+        position: 'absolute',
+        inset: '-6px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
+        filter: 'blur(8px)',
+      }} />
+
       <svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        style={{ transform: 'rotate(-90deg)' }}
+        style={{ transform: 'rotate(-90deg)', position: 'relative', zIndex: 1 }}
       >
         {/* Track */}
         <circle
@@ -60,13 +69,20 @@ export default function ScoreRing({ score, size = 110, label }: Props) {
           stroke="var(--bg-elevated)"
           strokeWidth={strokeWidth}
         />
-        {/* Progress — solid accent color, no gradient */}
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id={`scoreGradient-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--gradient-start)" />
+            <stop offset="100%" stopColor="var(--gradient-end)" />
+          </linearGradient>
+        </defs>
+        {/* Progress */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={`url(#scoreGradient-${size})`}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -81,11 +97,12 @@ export default function ScoreRing({ score, size = 110, label }: Props) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 2,
       }}>
         <span style={{
           fontFamily: 'var(--font-heading)',
-          fontSize: size > 80 ? '1.5rem' : '1.1rem',
-          fontWeight: 700,
+          fontSize: size > 80 ? '1.6rem' : '1.2rem',
+          fontWeight: 800,
           color: 'var(--text-primary)',
           letterSpacing: '-0.02em',
           lineHeight: 1,

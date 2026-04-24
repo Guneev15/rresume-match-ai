@@ -41,7 +41,7 @@ export default function RewrittenBullets({ bullets }: Props) {
   };
 
   return (
-    <div className="card-elevated" style={{ padding: '24px' }}>
+    <div className="card" style={{ padding: '24px' }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -85,8 +85,10 @@ export default function RewrittenBullets({ bullets }: Props) {
                 fontWeight: selectedTone === tone.id ? 600 : 500,
                 fontFamily: 'var(--font-heading)',
                 color: selectedTone === tone.id ? 'white' : 'var(--text-muted)',
-                background: selectedTone === tone.id ? 'var(--accent)' : 'transparent',
-                transition: 'all 0.2s var(--ease-standard)',
+                background: selectedTone === tone.id
+                  ? 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))'
+                  : 'transparent',
+                transition: 'all 0.2s ease',
               }}
             >
               {tone.label}
@@ -148,7 +150,7 @@ export default function RewrittenBullets({ bullets }: Props) {
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '10px',
-                background: 'var(--accent-subtle)',
+                background: 'rgba(124, 92, 252, 0.03)',
               }}>
                 <span style={{
                   fontSize: '0.68rem',

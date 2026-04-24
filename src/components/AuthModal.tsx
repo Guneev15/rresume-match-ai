@@ -125,15 +125,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       onClick={onClose}
     >
       <div
-        className="card-elevated"
+        className="glass-card"
         style={{
           padding: '32px',
           maxWidth: '420px',
           width: '90%',
           position: 'relative',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.5)',
+          background: 'rgba(18, 18, 26, 0.9)',
+          border: '1px solid rgba(124, 92, 252, 0.1)',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(124, 92, 252, 0.05)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -178,8 +178,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         {/* Error */}
         {error && (
           <div style={{
-            background: 'rgba(239, 68, 68, 0.06)',
-            border: '1px solid rgba(239, 68, 68, 0.12)',
+            background: 'rgba(255, 107, 107, 0.08)',
+            border: '1px solid rgba(255, 107, 107, 0.15)',
             borderRadius: '10px',
             padding: '12px',
             marginBottom: '16px',

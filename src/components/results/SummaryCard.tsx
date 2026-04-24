@@ -14,12 +14,29 @@ export default function SummaryCard({ result }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="card-elevated"
-      style={{ position: 'relative', overflow: 'hidden' }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="glass-card"
+      style={{
+        background: 'linear-gradient(135deg, rgba(124, 92, 252, 0.06) 0%, rgba(62, 207, 180, 0.03) 100%)',
+        border: '1px solid rgba(124, 92, 252, 0.1)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
     >
+      {/* Subtle glow orb */}
+      <div style={{
+        position: 'absolute',
+        top: '-30px',
+        right: '-30px',
+        width: '120px',
+        height: '120px',
+        background: 'radial-gradient(circle, rgba(124, 92, 252, 0.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+      }} />
+
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -37,10 +54,9 @@ export default function SummaryCard({ result }: Props) {
           <h3 style={{
             fontFamily: 'var(--font-heading)',
             fontSize: '1.05rem',
-            fontWeight: 600,
+            fontWeight: 700,
             marginBottom: '12px',
             letterSpacing: '-0.01em',
-            color: 'var(--text-primary)',
           }}>
             Summary
           </h3>
@@ -64,7 +80,7 @@ export default function SummaryCard({ result }: Props) {
                   width: '5px',
                   height: '5px',
                   borderRadius: '50%',
-                  background: 'var(--accent)',
+                  background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
                   flexShrink: 0,
                   marginTop: '8px',
                 }} />
