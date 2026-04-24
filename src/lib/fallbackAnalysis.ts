@@ -106,6 +106,9 @@ export function fallbackAnalysis(resume: ResumeData, job: JobInput): AnalysisRes
   // Action items
   const topActions = generateFallbackActions(resume, missingKeywords, numberedBullets);
 
+  // Generate bullet rewrites from weakest experience bullets
+  const rewrites = generateFallbackRewrites(resume, job);
+
   // ATS checklist
   const atsChecklist = [
     { item: 'Contact information (name, email, phone) is clearly listed', passed: hasEmail && hasPhone && hasName },
@@ -128,7 +131,7 @@ export function fallbackAnalysis(resume: ResumeData, job: JobInput): AnalysisRes
       achievementQuality: achievementScore,
     },
     topActions,
-    rewrites: [],
+    rewrites,
     keywordsToAdd: missingKeywords,
     atsChecklist,
     explainability: {
@@ -226,6 +229,78 @@ function generateFallbackActions(resume: ResumeData, missing: string[], numbered
   });
 
   return actions.slice(0, 7);
+}
+
+function generateFallbackRewrites(resume: ResumeData, job: JobInput): AnalysisResult['rewrites'] {
+  const rewrites: AnalysisResult['rewrites'] = [];
+  const allBullets: string[] = [];
+
+  // Collect all experience bullets
+  for (const exp of resume.experience) {
+    allBullets.push(...exp.bullets);
+  }
+
+  if (allBullets.length === 0) return [];
+
+  // Pick bullets that lack metrics (weakest ones)
+  const weakBullets = allBullets.filter(b => !/\d+%|\$[\d,]+|\d+x|\d+ /.test(b));
+  const bulletsToRewrite = (weakBullets.length > 0 ? weakBullets : allBullets).slice(0, 3);
+
+  for (const bullet of bulletsToRewrite) {
+    const trimmed = bullet.trim();
+    if (trimmed.length < 10) continue;
+
+    // Generate a simple improved version with metrics placeholder
+    const improved = improvesBullet(trimmed, job.jobTitle);
+
+    rewrites.push({
+      original: trimmed,
+      improved,
+      toneVariants: {
+        technical: `Engineered and ${improved.toLowerCase()}`,
+        product: `Drove ${improved.toLowerCase().replace(/^led |^managed |^developed /, '')}`,
+        leadership: `Led initiative to ${improved.toLowerCase().replace(/^led |^managed |^developed /, '')}`,
+      },
+    });
+  }
+
+  return rewrites;
+}
+
+function improvesBullet(bullet: string, jobTitle: string): string {
+  const lower = bullet.toLowerCase();
+  
+  // Add metrics and action verbs based on content
+  if (lower.includes('responsible for') || lower.includes('duties include')) {
+    return bullet
+      .replace(/responsible for /i, 'Spearheaded ')
+      .replace(/duties include /i, 'Drove ')
+      + ', resulting in measurable improvements';
+  }
+  
+  if (lower.includes('helped') || lower.includes('assisted')) {
+    return bullet
+      .replace(/helped /i, 'Collaborated to ')
+      .replace(/assisted /i, 'Partnered with team to ')
+      + ', contributing to [X%] efficiency gains';
+  }
+  
+  if (lower.includes('worked on') || lower.includes('worked with')) {
+    return bullet
+      .replace(/worked on /i, 'Delivered ')
+      .replace(/worked with /i, 'Collaborated with ')
+      + ' impacting [X] users/stakeholders';
+  }
+
+  // Default: add impact statement
+  const actionVerbs = ['Spearheaded', 'Delivered', 'Optimized', 'Architected', 'Drove'];
+  const verb = actionVerbs[Math.floor(Math.random() * actionVerbs.length)];
+  
+  if (!/^[A-Z]/.test(bullet)) {
+    return `${verb} ${bullet}, achieving [X%] improvement in key metrics`;
+  }
+  
+  return `${bullet}, resulting in [X%] improvement in efficiency and impact`;
 }
 
 // Helper: Extract relevant keywords from any job title dynamically
