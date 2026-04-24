@@ -78,7 +78,7 @@ async function callOpenRouter(
           },
         ],
         temperature: 0,       // Deterministic = faster, no sampling overhead
-        max_tokens: 800,      // Minimal output = faster + less rate-limit usage
+        max_tokens: 1000,     // Room for 3 rewrites with tone variants
         top_p: 0.9,           // Slightly constrained for speed
       }),
       signal: controller.signal,
