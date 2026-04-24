@@ -68,7 +68,7 @@ async function callOpenRouter(
   prompt: string
 ): Promise<AnalysisResult | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+  const timeout = setTimeout(() => controller.abort(), 120000); // 120s — free models can be slow
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
