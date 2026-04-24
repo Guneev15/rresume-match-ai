@@ -14,7 +14,7 @@ export async function analyzeWithAI(
   job: JobInput,
   apiKey: string
 ): Promise<AnalysisResult> {
-  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'tencent/hy3-preview:free';
+  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'baidu/qianfan-ocr-fast:free';
 
   // Trim resume text to first 2000 chars for speed
   const trimmedResume = resumeText.length > 2000 
