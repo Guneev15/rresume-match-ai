@@ -240,17 +240,14 @@ function generateFallbackRewrites(resume: ResumeData, job: JobInput): AnalysisRe
     allBullets.push(...exp.bullets);
   }
 
-  if (allBullets.length === 0) return [];
-
-  // Pick bullets that lack metrics (weakest ones)
+  // Pick bullets that lack metrics (weakest ones) — up to 5
   const weakBullets = allBullets.filter(b => !/\d+%|\$[\d,]+|\d+x|\d+ /.test(b));
-  const bulletsToRewrite = (weakBullets.length > 0 ? weakBullets : allBullets).slice(0, 3);
+  const bulletsToRewrite = (weakBullets.length > 0 ? weakBullets : allBullets).slice(0, 5);
 
   for (const bullet of bulletsToRewrite) {
     const trimmed = bullet.trim();
     if (trimmed.length < 10) continue;
 
-    // Generate a simple improved version with metrics placeholder
     const improved = improvesBullet(trimmed, job.jobTitle);
 
     rewrites.push({
@@ -262,6 +259,37 @@ function generateFallbackRewrites(resume: ResumeData, job: JobInput): AnalysisRe
         leadership: `Led initiative to ${improved.toLowerCase().replace(/^led |^managed |^developed /, '')}`,
       },
     });
+  }
+
+  // If we have fewer than 3, add generic suggestions for this role
+  if (rewrites.length < 3) {
+    const genericBullets = [
+      {
+        original: 'Managed day-to-day tasks and responsibilities',
+        improved: `Owned end-to-end delivery of key ${job.jobTitle} initiatives, driving [X%] improvement in team velocity`,
+      },
+      {
+        original: 'Worked with team members on projects',
+        improved: `Collaborated cross-functionally with [X] teams to deliver projects on time, reducing cycle time by [X%]`,
+      },
+      {
+        original: 'Used various tools and technologies',
+        improved: `Leveraged industry-standard tools to automate workflows, saving [X] hours/week in manual effort`,
+      },
+    ];
+
+    for (const gb of genericBullets) {
+      if (rewrites.length >= 5) break;
+      rewrites.push({
+        original: gb.original,
+        improved: gb.improved,
+        toneVariants: {
+          technical: `Architected and ${gb.improved.toLowerCase()}`,
+          product: `Drove ${gb.improved.toLowerCase()}`,
+          leadership: `Spearheaded ${gb.improved.toLowerCase()}`,
+        },
+      });
+    }
   }
 
   return rewrites;

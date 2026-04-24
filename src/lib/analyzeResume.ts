@@ -13,9 +13,9 @@ export async function analyzeWithAI(
 ): Promise<AnalysisResult> {
   const model = process.env.NEXT_PUBLIC_AI_MODEL || 'google/gemma-4-26b-a4b-it:free';
 
-  // Trim resume aggressively — fewer input tokens = less rate-limit pressure
-  const trimmedResume = resumeText.length > 1500 
-    ? resumeText.substring(0, 1500) + '\n[...]'
+  // Trim resume — balance between speed and capturing enough content
+  const trimmedResume = resumeText.length > 2500 
+    ? resumeText.substring(0, 2500) + '\n[...]'
     : resumeText;
   const prompt = buildAnalysisPrompt(trimmedResume, job);
 
