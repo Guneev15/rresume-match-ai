@@ -1,9 +1,6 @@
 import { AnalysisResult, JobInput } from './types';
 import { buildAnalysisPrompt } from './prompts';
 
-// No fallback — use only the model from env
-const FALLBACK_MODELS: string[] = [];
-
 /** Wait for a given number of milliseconds */
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -14,53 +11,43 @@ export async function analyzeWithAI(
   job: JobInput,
   apiKey: string
 ): Promise<AnalysisResult> {
-  const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'baidu/qianfan-ocr-fast:free';
+  const model = process.env.NEXT_PUBLIC_AI_MODEL || 'google/gemma-4-26b-a4b-it:free';
 
-  // Trim resume text to first 2000 chars for speed
-  const trimmedResume = resumeText.length > 2000 
-    ? resumeText.substring(0, 2000) + '\n[... truncated ...]'
+  // Trim resume aggressively — fewer input tokens = less rate-limit pressure
+  const trimmedResume = resumeText.length > 1500 
+    ? resumeText.substring(0, 1500) + '\n[...]'
     : resumeText;
   const prompt = buildAnalysisPrompt(trimmedResume, job);
 
-  // Build the models to try: primary first, then fallbacks (de-duplicated)
-  const modelsToTry = [primaryModel, ...FALLBACK_MODELS.filter(m => m !== primaryModel)];
+  // Retry up to 3 times with exponential backoff for rate limits
+  const maxRetries = 3;
+  let lastError = '';
 
-  let lastError: string = '';
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const result = await callOpenRouter(apiKey, model, prompt);
+      if (result) return result;
+      lastError = `Model "${model}" returned unparseable response`;
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err.message : String(err);
 
-  for (const model of modelsToTry) {
-    // Try each model up to 2 times (retry once on 429 rate limit)
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
+      // On 429 rate limit, wait with exponential backoff then retry
+      if (lastError.includes('429') && attempt < maxRetries - 1) {
+        const waitMs = 5000 * Math.pow(2, attempt); // 5s, 10s, 20s
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[AI] Trying model: ${model} (attempt ${attempt + 1})`);
+          console.warn(`[AI] Rate limited, waiting ${waitMs / 1000}s before retry...`);
         }
-
-        const result = await callOpenRouter(apiKey, model, prompt);
-        if (result) return result;
-
-        lastError = `Model "${model}" returned unparseable response`;
-        break; // Don't retry parse failures, move to next model
-      } catch (err: unknown) {
-        lastError = err instanceof Error ? err.message : String(err);
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[AI] Model "${model}" attempt ${attempt + 1} failed:`, lastError);
-        }
-
-        // On 429 rate limit, wait and retry once; otherwise move to next model
-        if (lastError.includes('429') && attempt === 0) {
-          await sleep(3000);
-          continue;
-        }
-        break; // Non-429 error or second attempt, move to next model
+        await sleep(waitMs);
+        continue;
       }
     }
   }
 
-  throw new Error(`AI analysis failed after trying ${modelsToTry.length} models. Last error: ${lastError}`);
+  throw new Error(`AI analysis failed after ${maxRetries} attempts. Last error: ${lastError}`);
 }
 
 /**
- * Call OpenRouter API directly with fetch (more reliable than SDK for error handling)
+ * Call OpenRouter API with optimized parameters for free-tier rate limits
  */
 async function callOpenRouter(
   apiKey: string,
@@ -68,7 +55,7 @@ async function callOpenRouter(
   prompt: string
 ): Promise<AnalysisResult | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120000); // 120s — free models can be slow
+  const timeout = setTimeout(() => controller.abort(), 120000); // 120s
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -83,15 +70,16 @@ async function callOpenRouter(
         messages: [
           {
             role: 'system',
-            content: 'You are ResumeMatchAI. Analyze resumes against job descriptions. You MUST respond with ONLY a valid JSON object — no markdown, no explanation, no extra text. Just raw JSON.',
+            content: 'You are ResumeMatchAI. Respond with ONLY valid JSON. No markdown, no explanation.',
           },
           {
             role: 'user',
             content: prompt,
           },
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        temperature: 0,       // Deterministic = faster, no sampling overhead
+        max_tokens: 800,      // Minimal output = faster + less rate-limit usage
+        top_p: 0.9,           // Slightly constrained for speed
       }),
       signal: controller.signal,
     });
