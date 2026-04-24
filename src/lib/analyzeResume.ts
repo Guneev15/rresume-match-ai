@@ -1,16 +1,17 @@
 import { AnalysisResult, JobInput } from './types';
 import { buildAnalysisPrompt } from './prompts';
 
-// Models to try in order — diverse providers to avoid all being rate-limited at once
+// Models to try in order — verified available free models (April 2026)
+// Diverse providers to minimize chance of all being rate-limited
 const FALLBACK_MODELS = [
   'google/gemma-4-31b-it:free',
-  'deepseek/deepseek-r1-0528:free',
-  'qwen/qwen3-32b:free',
-  'meta-llama/llama-4-scout:free',
-  'google/gemma-4-26b-a4b-it:free',
   'meta-llama/llama-3.3-70b-instruct:free',
-  'google/gemma-3-27b-it:free',
-  'mistralai/devstral-small:free',
+  'qwen/qwen3-next-80b-a3b-instruct:free',
+  'tencent/hy3-preview:free',
+  'nousresearch/hermes-3-llama-3.1-405b:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'nvidia/nemotron-3-super:free',
+  'minimax/minimax-m2.5:free',
 ];
 
 /** Wait for a given number of milliseconds */
