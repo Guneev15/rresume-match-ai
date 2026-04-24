@@ -1,11 +1,8 @@
 import { AnalysisResult, JobInput } from './types';
 import { buildAnalysisPrompt } from './prompts';
 
-// Primary model + minimal fallback
-const FALLBACK_MODELS = [
-  'tencent/hy3-preview:free',
-  'google/gemma-4-31b-it:free',
-];
+// No fallback — use only the model from env
+const FALLBACK_MODELS: string[] = [];
 
 /** Wait for a given number of milliseconds */
 function sleep(ms: number): Promise<void> {
