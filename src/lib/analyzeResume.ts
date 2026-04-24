@@ -1,13 +1,22 @@
 import { AnalysisResult, JobInput } from './types';
 import { buildAnalysisPrompt } from './prompts';
 
-// Models to try in order — if the primary fails to return valid JSON, try the next
+// Models to try in order — diverse providers to avoid all being rate-limited at once
 const FALLBACK_MODELS = [
   'google/gemma-4-31b-it:free',
+  'deepseek/deepseek-r1-0528:free',
+  'qwen/qwen3-32b:free',
+  'meta-llama/llama-4-scout:free',
   'google/gemma-4-26b-a4b-it:free',
   'meta-llama/llama-3.3-70b-instruct:free',
   'google/gemma-3-27b-it:free',
+  'mistralai/devstral-small:free',
 ];
+
+/** Wait for a given number of milliseconds */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export async function analyzeWithAI(
   resumeText: string,
@@ -28,19 +37,30 @@ export async function analyzeWithAI(
   let lastError: string = '';
 
   for (const model of modelsToTry) {
-    try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[AI] Trying model: ${model}`);
-      }
+    // Try each model up to 2 times (retry once on 429 rate limit)
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[AI] Trying model: ${model} (attempt ${attempt + 1})`);
+        }
 
-      const result = await callOpenRouter(apiKey, model, prompt);
-      if (result) return result;
+        const result = await callOpenRouter(apiKey, model, prompt);
+        if (result) return result;
 
-      lastError = `Model "${model}" returned unparseable response`;
-    } catch (err: unknown) {
-      lastError = err instanceof Error ? err.message : String(err);
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`[AI] Model "${model}" failed:`, lastError);
+        lastError = `Model "${model}" returned unparseable response`;
+        break; // Don't retry parse failures, move to next model
+      } catch (err: unknown) {
+        lastError = err instanceof Error ? err.message : String(err);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[AI] Model "${model}" attempt ${attempt + 1} failed:`, lastError);
+        }
+
+        // On 429 rate limit, wait and retry once; otherwise move to next model
+        if (lastError.includes('429') && attempt === 0) {
+          await sleep(3000);
+          continue;
+        }
+        break; // Non-429 error or second attempt, move to next model
       }
     }
   }
