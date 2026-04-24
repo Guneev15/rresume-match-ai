@@ -1,20 +1,19 @@
 import { JobInput } from './types';
 
 export function buildAnalysisPrompt(resumeText: string, job: JobInput): string {
-  return `Analyze this resume against the target job. Return structured JSON.
+  return `Analyze resume vs job. Return JSON only.
 
-TARGET: ${job.jobTitle} | ${job.seniority} | ${job.industry || 'General'}
+JOB: ${job.jobTitle} | ${job.seniority} | ${job.industry || 'General'}
 
 RESUME:
 ${resumeText}
 
-SCORING: Skills match (50%), Experience (25%), ATS (10%), Achievements (5%), Education (10%).
-Apply heavy penalties for domain mismatch (15-30 score). Good fit = 70-85. Excellent = 85+.
+SCORING: Skills(50%) Experience(25%) ATS(10%) Achievements(5%) Education(10%). Domain mismatch=15-30. Good=70-85. Excellent=85+.
 
-Return ONLY valid JSON:
+Return ONLY this JSON:
 {
   "overallScore": <0-100>,
-  "summary": "<3 sentence career-coach style summary, honest about fit>",
+  "summary": "<2 sentence summary>",
   "sectionScores": {
     "skillsMatch": <0-100>,
     "experienceMatch": <0-100>,
@@ -23,18 +22,18 @@ Return ONLY valid JSON:
     "achievementQuality": <0-100>
   },
   "topActions": [
-    {"priority": 1, "text": "<action 6-14 words>", "why": "<evidence>"}
+    {"priority": 1, "text": "<action>", "why": "<reason>"}
   ],
   "rewrites": [
-    {"original": "<bullet from resume>", "improved": "<better version>", "toneVariants": {"technical": "", "product": "", "leadership": ""}}
+    {"original": "<bullet>", "improved": "<better>", "toneVariants": {"technical": "", "product": "", "leadership": ""}}
   ],
-  "keywordsToAdd": ["keyword1", "keyword2"],
+  "keywordsToAdd": ["kw1", "kw2"],
   "atsChecklist": [{"item": "<check>", "passed": true}],
   "explainability": {
     "skillMatches": [{"skill": "<skill>", "evidence": ["<excerpt>"]}],
-    "scoreBreakdown": "<how score was computed>"
+    "scoreBreakdown": "<brief>"
   }
 }
 
-Give 5 actions, 3 rewrites, 5-8 keywords, 5 ATS checks.`;
+Give 3 actions, 2 rewrites, 5 keywords, 4 ATS checks. Be concise.`;
 }

@@ -16,9 +16,9 @@ export async function analyzeWithAI(
 ): Promise<AnalysisResult> {
   const primaryModel = process.env.NEXT_PUBLIC_AI_MODEL || 'tencent/hy3-preview:free';
 
-  // Trim resume text to first 3000 chars for speed
-  const trimmedResume = resumeText.length > 3000 
-    ? resumeText.substring(0, 3000) + '\n[... resume truncated for speed ...]'
+  // Trim resume text to first 2000 chars for speed
+  const trimmedResume = resumeText.length > 2000 
+    ? resumeText.substring(0, 2000) + '\n[... truncated ...]'
     : resumeText;
   const prompt = buildAnalysisPrompt(trimmedResume, job);
 
@@ -68,7 +68,7 @@ async function callOpenRouter(
   prompt: string
 ): Promise<AnalysisResult | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000); // 90s per attempt — free models can be slow
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -91,7 +91,7 @@ async function callOpenRouter(
           },
         ],
         temperature: 0.3,
-        max_tokens: 1500,
+        max_tokens: 1000,
       }),
       signal: controller.signal,
     });
